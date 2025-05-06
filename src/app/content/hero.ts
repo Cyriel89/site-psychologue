@@ -1,13 +1,14 @@
 export const heroContent = {
-    title: "Retrouvez équilibre et sérénité",
-    subtitle: "Psychologue du travail & clinicienne à Nantes",
+    name: "Pauline Diné",
+    title: "Psychologue du travail",
+    subtitle: "Retrouvez équilibre et sérénité au travail",
     cta: {
       label: "Prendre rendez-vous",
       href: "#contact", // à remplacer par lien Doctolib ou page
     },
     image: {
       src: "/images/hero.jpg",
-      alt: "Illustration apaisante, nature, bien-être"
+      alt: "Pauline Diné - Psychologue du travail"
     }
   };
   
