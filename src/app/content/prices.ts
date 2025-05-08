@@ -27,5 +27,10 @@ export const pricesContent = {
             price: "Sur devis",
             description: "Analyse des risques psychosociaux au sein de votre entreprise, avec recommandations personnalisées pour améliorer le bien être au travail.",
         },
+        {
+            title: "Formation sur mesure",
+            price: "Sur devis",
+            description: "Ateliers et formations adaptés à vos besoins spécifiques en matière de gestion du stress et de bien-être au travail.",
+        },
     ]
 }
