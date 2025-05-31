@@ -7,25 +7,26 @@ export const locationContent = {
         description: "Le cabinet est situé au cœur de Nantes, à proximité de la gare et des transports en commun.",
         mapLink: "https://maps.app.goo.gl/UgPGFSfgcM3fSLpe9",
         mapText: "Voir sur Google Maps",
+        openingHoursTitle: "Horaires d'ouvertures :",
         openingHours: [
             {
-                day: "Lundi",
+                day: "Lundi :",
                 hours: "9h - 19h",
             },
             {
-                day: "Mardi",
+                day: "Mardi :",
                 hours: "9h - 19h",
             },
             {
-                day: "Mercredi",
+                day: "Mercredi :",
                 hours: "9h - 19h",
             },
             {
-                day: "Jeudi",
+                day: "Jeudi :",
                 hours: "9h - 19h",
             },
             {
-                day: "Vendredi",
+                day: "Vendredi :",
                 hours: "9h - 19h",
             }   
         ],

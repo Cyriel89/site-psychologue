@@ -5,6 +5,7 @@ import SessionSteps from "@/sections/SessionSteps";
 import Prices from "@/sections/Prices";
 import Partners from "@/sections/Partners";
 import Location from "@/sections/Location";
+import Contact from "@/sections/Contact";
 
 export default function Home() {
   return (
@@ -16,6 +17,8 @@ export default function Home() {
       <Prices />
       <Partners />
       <Location />
+      <Contact />
+      
     </main>
   );
 }

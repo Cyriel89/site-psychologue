@@ -1,13 +1,15 @@
 "use client";
 
 import { locationContent } from "@/content/location";
+import dynamic from "next/dynamic";
+const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export default function Location() {
     return (
         <section className="w-full px-4 py-16 md:py-24 bg-white">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div className="max-w-6xl flex">
                 {/* Colonne gauche : infos lieu */}
-                <div className="space-y-6">
+                <div className="w-1/2">
                     <h2 className="text-2xl font-bold text-gray-800">{locationContent.title}</h2>
                     <p className="text-gray-600">
                         {locationContent.subtitle}
@@ -23,14 +25,19 @@ export default function Location() {
                     >
                         {locationContent.addresses.mapText}
                     </a>
+                    <p className="text-gray-600">{locationContent.addresses.openingHoursTitle}</p>
+                    {locationContent.addresses.openingHours.map((item, index) => (
+                        <p key={index} className="text-gray-600">{item.day} {item.hours}</p>
+                    ))}
+                    
                 </div>
 
                 {/* Colonne droite : carte (à venir) */}
-                <div className="w-full h-80 bg-gray-200 rounded-xl relative overflow-hidden">
+                <div className="w-1/2 h-[400px] bg-gray-200 rounded-xl overflow-hidden">
                     {/* Carte Leaflet interactive à venir ici */}
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                        Carte en cours d&apos;intégration...
-                    </div>
+                    
+                        <Map />
+                    
                 </div>
             </div>
 
