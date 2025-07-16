@@ -15,7 +15,8 @@ export default function Contact() {
   });
 
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
-  const [previewUrl, setPreviewUrl] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [formTimeStamp] = useState(() => Date.now());
 
   // Fonction appelée à chaque modification d’un champ du formulaire
   const handleChange = (
@@ -35,23 +36,30 @@ export default function Contact() {
     e.preventDefault(); // Empêche le rechargement de la page
 
     setStatus("sending"); // On affiche "envoi en cours..."
+    setErrorMsg(""); // Réinitialise le message d'erreur
 
+    if (!formData.name || !formData.email || !formData.message || !formData.rgpd) {
+      setErrorMsg("Merci de remplir tous les champs obligatoires.");
+      setStatus("error");
+      return;
+    }
     try {
       // Envoi des données au back-end via l'API
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, timeStamp: formTimeStamp }),
       });
 
-      const result = await res.json();
+      const data = await res.json();
 
-      // Si erreur côté serveur, on lève une exception
-      if (!res.ok) throw new Error(result.message || "Erreur d’envoi");
-
+      if (!res.ok) {
+        setErrorMsg(data.message || "Une erreur s’est produite.");
+        setStatus("error");
+        return;
+      }
       // Envoi réussi → on passe l’état à "success"
       setStatus("success");
-      setPreviewUrl(result.previewUrl || "");
 
       // On vide les champs
       setFormData({
@@ -62,8 +70,9 @@ export default function Contact() {
         website: "",
         rgpd: false,
       });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      console.error(err);
+      console.error("Une erreur réseau s'est produite.");
       setStatus("error");
     }
   };
@@ -94,7 +103,7 @@ export default function Contact() {
             </div>
             <div>
               <label htmlFor="subject" className="block text-sm font-medium text-gray-700">{ contactContent.form.subject.label }</label>
-              <input type="text" id="subject" name="subject" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value={formData.subject} onChange={handleChange}/>
+              <input type="text" id="subject" name="subject" required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value={formData.subject} onChange={handleChange}/>
             </div>
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700">{ contactContent.form.message.label }</label>
@@ -109,24 +118,13 @@ export default function Contact() {
             <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" disabled={status === "sending"} onClick={handleSubmit}>
               {status === "sending" ? "Envoi en cours..." : contactContent.submitButtonText}
             </button>
+
             {/* Message de confirmation ou d'erreur */}
             {status === "success" && (
-              <p className="text-green-600">
-                Message envoyé avec succès ✅{" "}
-                {previewUrl && (
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    Voir l’email
-                  </a>
-                )}
-              </p>
+              <p className="text-green-600">Votre message a été envoyé avec succès.</p>
             )}
             {status === "error" && (
-              <p className="text-red-600">Une erreur est survenue. Veuillez réessayer.</p>
+              <p className="text-red-600">{errorMsg}</p>
             )}
           </form>
 
