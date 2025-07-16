@@ -12,6 +12,6 @@ export const footerContent = {
   ],
   legal: [
     { label: "Mentions légales", href: "/legal-notice" },
-    { label: "Politique de confidentialité", href: "/politique-confidentialite" },
+    { label: "Politique de confidentialité", href: "/privacy-policy" },
   ],
 };
