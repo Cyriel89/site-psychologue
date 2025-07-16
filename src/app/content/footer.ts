@@ -1,0 +1,17 @@
+export const footerContent = {
+  name: "Pauline Diné",
+  year: new Date().getFullYear(),
+  address: "1 rue Exemple, 44000 Nantes",
+  phone: "06 00 00 00 00",
+  email: "contact@example.com",
+  links: [
+    { label: "Accueil", href: "#hero" },
+    { label: "À propos", href: "#about" },
+    { label: "Services", href: "#services" },
+    { label: "Contact", href: "#contact" },
+  ],
+  legal: [
+    { label: "Mentions légales", href: "#mentions-legales" },
+    { label: "Politique de confidentialité", href: "#politique-confidentialite" },
+  ],
+};
