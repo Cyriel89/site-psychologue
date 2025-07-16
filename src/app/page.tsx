@@ -6,6 +6,7 @@ import Prices from "@/sections/Prices";
 import Partners from "@/sections/Partners";
 import Location from "@/sections/Location";
 import Contact from "@/sections/Contact";
+import Faq from "@/sections/Faq";
 
 export default function Home() {
   return (
@@ -18,7 +19,7 @@ export default function Home() {
       <Partners />
       <Location />
       <Contact />
-      
+      <Faq />
     </main>
   );
 }
