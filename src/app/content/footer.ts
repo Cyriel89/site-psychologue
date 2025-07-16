@@ -11,7 +11,7 @@ export const footerContent = {
     { label: "Contact", href: "#contact" },
   ],
   legal: [
-    { label: "Mentions légales", href: "#mentions-legales" },
-    { label: "Politique de confidentialité", href: "#politique-confidentialite" },
+    { label: "Mentions légales", href: "/legal-notice" },
+    { label: "Politique de confidentialité", href: "/politique-confidentialite" },
   ],
 };
