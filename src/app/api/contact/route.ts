@@ -5,11 +5,15 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, email, subject, message, website } = body;
+    const { name, email, subject, message, website, timestamp } = body;
 
     // Honeypot : détection de bot
     if (website) {
       return NextResponse.json({ message: "Spam détecté." }, { status: 400 });
+    }
+
+    if (!timestamp || Date.now() - timestamp < 5000) {
+      return NextResponse.json({ message: "Envoi trop rapide. Action suspecte." }, { status: 400 });
     }
 
     if (!name || !email || !subject || !message) {
