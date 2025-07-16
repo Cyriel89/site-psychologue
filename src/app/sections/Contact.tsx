@@ -1,8 +1,73 @@
 // components/ContactSection.tsx
 "use client";
 
+import { useState } from "react";
 import {contactContent } from "@/content/contact";
+
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+    website: "", // Honeypot field
+    rgpd: false,
+  });
+
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  // Fonction appelée à chaque modification d’un champ du formulaire
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+
+    // Mise à jour de la donnée correspondante dans formData
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === "checkbox" && e.target instanceof HTMLInputElement ? e.target.checked : value,
+    }));
+  };
+
+  // Fonction appelée lors de la soumission du formulaire
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // Empêche le rechargement de la page
+
+    setStatus("sending"); // On affiche "envoi en cours..."
+
+    try {
+      // Envoi des données au back-end via l'API
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await res.json();
+
+      // Si erreur côté serveur, on lève une exception
+      if (!res.ok) throw new Error(result.message || "Erreur d’envoi");
+
+      // Envoi réussi → on passe l’état à "success"
+      setStatus("success");
+      setPreviewUrl(result.previewUrl || "");
+
+      // On vide les champs
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+        website: "",
+        rgpd: false,
+      });
+    } catch (err) {
+      console.error(err);
+      setStatus("error");
+    }
+  };
+
   return (
     <section id="contact" className="py-16 bg-gray-50">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -10,31 +75,59 @@ export default function Contact() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Formulaire */}
           <form className="space-y-6">
+            <input
+              type="text"
+              name="website"
+              autoComplete="off"
+              className="hidden"
+              tabIndex={-1}
+              value={formData.website}
+              onChange={handleChange}
+            />
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">{ contactContent.form.name.label }</label>
-              <input type="text" id="name" name="name" required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+              <input type="text" id="name" name="name" required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value={formData.name} onChange={handleChange}/>
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">{ contactContent.form.email.label }</label>
-              <input type="email" id="email" name="email" required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+              <input type="email" id="email" name="email" required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value={formData.email} onChange={handleChange}/>
             </div>
             <div>
               <label htmlFor="subject" className="block text-sm font-medium text-gray-700">{ contactContent.form.subject.label }</label>
-              <input type="text" id="subject" name="subject" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+              <input type="text" id="subject" name="subject" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value={formData.subject} onChange={handleChange}/>
             </div>
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700">{ contactContent.form.message.label }</label>
-              <textarea id="message" name="message" rows={5} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+              <textarea id="message" name="message" rows={5} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value={formData.message} onChange={handleChange}/>
             </div>
             <div className="flex items-start space-x-2">
-              <input type="checkbox" id="rgpd" name="rgpd" required className="mt-1" />
+              <input type="checkbox" id="rgpd" name="rgpd" required className="mt-1" checked={formData.rgpd} onChange={handleChange}/>
               <label htmlFor="rgpd" className="text-sm text-gray-700">
                 { contactContent.form.rgpd.label }
               </label>
             </div>
-            <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-              { contactContent.submitButtonText }
+            <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" disabled={status === "sending"} onClick={handleSubmit}>
+              {status === "sending" ? "Envoi en cours..." : contactContent.submitButtonText}
             </button>
+            {/* Message de confirmation ou d'erreur */}
+            {status === "success" && (
+              <p className="text-green-600">
+                Message envoyé avec succès ✅{" "}
+                {previewUrl && (
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Voir l’email
+                  </a>
+                )}
+              </p>
+            )}
+            {status === "error" && (
+              <p className="text-red-600">Une erreur est survenue. Veuillez réessayer.</p>
+            )}
           </form>
 
           {/* Encadré latéral (optionnel) */}
