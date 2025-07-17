@@ -34,7 +34,7 @@ export const contactContent = {
         items: [
             { icon: "📍", text: "Adresse : 1 rue Exemple, 44000 Nantes" },
             { icon: "📆", text: "Horaires : lundi au vendredi, 9h - 18h" },
-            { icon: "📧", text: "Email :"}
+            { icon: "📧", text: "Email : contact@contact.com"}
         ]
     }
 }

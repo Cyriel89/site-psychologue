@@ -2,54 +2,77 @@
 
 import { locationContent } from "@/content/location";
 import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export default function Location() {
-    return (
-        <section className="w-full px-4 py-16 md:py-24 bg-white">
-            <div className="max-w-6xl flex">
-                {/* Colonne gauche : infos lieu */}
-                <div className="w-1/2">
-                    <h2 className="text-2xl font-bold text-gray-800">{locationContent.title}</h2>
-                    <p className="text-gray-600">
-                        {locationContent.subtitle}
-                    </p>
-                    <p className="text-gray-600">
-                        {locationContent.addresses.title} <strong>{locationContent.addresses.address}</strong>
-                    </p>
-                    <a
-                        href= {locationContent.addresses.mapLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block text-blue-600 hover:underline font-medium"
-                    >
-                        {locationContent.addresses.mapText}
-                    </a>
-                    <p className="text-gray-600">{locationContent.addresses.openingHoursTitle}</p>
-                    {locationContent.addresses.openingHours.map((item, index) => (
-                        <p key={index} className="text-gray-600">{item.day} {item.hours}</p>
-                    ))}
-                    
-                </div>
+  return (
+    <section className="min-h-screen w-full px-4 py-16 bg-secondary flex items-center justify-center">
+      <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Colonne gauche */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="space-y-4"
+        >
+          <h2 className="text-3xl font-bold text-primary mb-2">
+            {locationContent.title}
+          </h2>
+          <p className="text-textLight">{locationContent.subtitle}</p>
+          <p className="text-textLight">
+            {locationContent.addresses.title}{" "}
+            <strong>{locationContent.addresses.address}</strong>
+          </p>
+          <p className="text-textLight">{locationContent.addresses.description}</p>
+          <a
+            href={locationContent.addresses.mapLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-primary font-medium hover:underline"
+          >
+            {locationContent.addresses.mapText}
+          </a>
+          <div className="mt-4">
+            <p className="text-textLight font-semibold">
+              {locationContent.addresses.openingHoursTitle}
+            </p>
+            {locationContent.addresses.openingHours.map((item, index) => (
+              <p key={index} className="text-textLight">
+                {item.day} {item.hours}
+              </p>
+            ))}
+          </div>
+        </motion.div>
 
-                {/* Colonne droite : carte (à venir) */}
-                <div className="w-1/2 h-[400px] bg-gray-200 rounded-xl overflow-hidden">
-                    {/* Carte Leaflet interactive à venir ici */}
-                    
-                        <Map />
-                    
-                </div>
-            </div>
+        {/* Colonne droite : carte */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="h-[400px] w-full bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden"
+        >
+          <Map />
+        </motion.div>
+      </div>
 
-            {/* Lien d'ouverture mobile spécifique */}
-            <div className="mt-8 text-center lg:hidden">
-                <a
-                    href="geo:0,0?q=12 Rue de la Sérénité, 44000 Nantes"
-                    className="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl text-lg hover:bg-blue-700 transition"
-                >
-                    Ouvrir dans une application de navigation
-                </a>
-            </div>
-        </section>
-    );
+      {/* Lien navigation mobile */}
+      <motion.div
+        className="mt-8 text-center md:hidden"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+      >
+        <a
+          href="geo:0,0?q=16 rue de Strasbourg, 44000 Nantes"
+          className="inline-block bg-primary text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-primary/90 transition"
+        >
+          Ouvrir dans une application de navigation
+        </a>
+      </motion.div>
+    </section>
+  );
 }

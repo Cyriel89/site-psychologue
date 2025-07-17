@@ -14,7 +14,7 @@ module.exports = {
         textLight: "#475569",
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ["Montserrat", "sans-serif"],
       },
     },
   },

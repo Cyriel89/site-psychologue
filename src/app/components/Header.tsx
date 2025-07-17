@@ -1,6 +1,6 @@
 export default function Header() {
     return (
-      <header className="p-4 shadow-md bg-white sticky top-0 z-50">
+      <header className="p-4 shadow-md bg-white  top-0 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-semibold">Psychologue</h1>
           <nav className="space-x-4">

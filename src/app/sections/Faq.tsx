@@ -3,7 +3,7 @@
 import { faqContent } from "@/content/faq";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react"; // ou un autre icône si tu préfères
+import { Plus, Minus } from "lucide-react";
 
 export default function Faq() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -13,14 +13,26 @@ export default function Faq() {
   };
 
   return (
-    <section id="faq" className="py-16 bg-white">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h2 className="text-3xl font-bold text-center mb-12">{faqContent.title}</h2>
+    <section id="faq" className="min-h-screen w-full px-4 py-16 bg-secondary flex items-center justify-center">
+      <div className="max-w-4xl w-full">
+        <motion.h2
+          className="text-3xl md:text-4xl font-bold text-primary text-center mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          {faqContent.title}
+        </motion.h2>
         <div className="space-y-4">
           {faqContent.faqs.map((faq, index) => (
-            <div
+            <motion.div
               key={index}
-              className="border border-gray-200 rounded-lg overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.4 }}
+              className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm"
             >
               <button
                 onClick={() => toggle(index)}
@@ -28,10 +40,15 @@ export default function Faq() {
               >
                 <span>{faq.question}</span>
                 <motion.div
-                  animate={{ rotate: activeIndex === index ? 180 : 0 }}
+                  initial={false}
+                  animate={{ rotate: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <ChevronDown />
+                  {activeIndex === index ? (
+                    <Minus className="w-5 h-5" />
+                  ) : (
+                    <Plus className="w-5 h-5" />
+                  )}
                 </motion.div>
               </button>
               <AnimatePresence initial={false}>
@@ -42,13 +59,13 @@ export default function Faq() {
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="px-4 pb-4 text-gray-600"
+                    className="px-4 pb-4 text-textLight"
                   >
                     <p>{faq.answer}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
