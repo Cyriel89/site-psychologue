@@ -2,27 +2,41 @@
 
 import { footerContent } from "@/content/footer";
 import Link from "next/link";
+import { Linkedin, Instagram, Facebook } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-800 text-gray-200 py-12 mt-16">
-      <div className="container mx-auto px-4 max-w-6xl grid gap-8 md:grid-cols-3">
+    <footer className="bg-primary text-gray-100 py-12">
+      <div className="max-w-6xl mx-auto px-4 grid gap-8 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/20">
         {/* Coordonnées */}
-        <div>
-          <h3 className="text-lg font-semibold mb-2">{footerContent.name}</h3>
+        <div className="space-y-2 pt-4 md:pt-0 md:px-4">
+          <h3 className="text-lg font-semibold text-white">{footerContent.name}</h3>
           <p className="text-sm">{footerContent.address}</p>
-          <p className="text-sm mt-1">{footerContent.phone}</p>
-          <p className="text-sm mt-1">
+          <p className="text-sm">{footerContent.phone}</p>
+          <p className="text-sm">
             <a href={`mailto:${footerContent.email}`} className="hover:underline">
               {footerContent.email}
             </a>
           </p>
+
+          {/* Réseaux sociaux */}
+          <div className="flex space-x-4 mt-4">
+            <a href="#" aria-label="LinkedIn" className="hover:bg-white/10 p-2 rounded-full transition">
+              <Linkedin className="w-6 h-6 text-gray-300 hover:text-white" />
+            </a>
+            <a href="#" aria-label="Instagram" className="hover:bg-white/10 p-2 rounded-full transition">
+              <Instagram className="w-6 h-6 text-gray-300 hover:text-white" />
+            </a>
+            <a href="#" aria-label="Facebook" className="hover:bg-white/10 p-2 rounded-full transition">
+              <Facebook className="w-6 h-6 text-gray-300 hover:text-white" />
+            </a>
+          </div>
         </div>
 
         {/* Navigation */}
-        <div>
-          <h4 className="text-lg font-semibold mb-2">Navigation</h4>
-          <ul className="space-y-1">
+        <div className="space-y-2 pt-4 md:pt-0 md:px-4">
+          <h4 className="text-lg font-semibold text-white">Navigation</h4>
+          <ul className="space-y-1 text-sm">
             {footerContent.links.map((link, index) => (
               <li key={index}>
                 <a href={link.href} className="hover:underline">
@@ -33,10 +47,10 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Légal */}
-        <div>
-          <h4 className="text-lg font-semibold mb-2">Informations</h4>
-          <ul className="space-y-1">
+        {/* Informations légales */}
+        <div className="space-y-2 pt-4 md:pt-0 md:px-4">
+          <h4 className="text-lg font-semibold text-white">Informations</h4>
+          <ul className="space-y-1 text-sm">
             {footerContent.legal.map((link, index) => (
               <li key={index}>
                 <Link href={link.href} className="hover:underline">
@@ -48,8 +62,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bas de page */}
-      <div className="mt-8 text-center text-sm text-gray-500">
+      <div className="mt-8 text-center text-xs text-gray-300">
         &copy; {footerContent.year} {footerContent.name}. Tous droits réservés.
       </div>
     </footer>

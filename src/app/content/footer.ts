@@ -5,7 +5,7 @@ export const footerContent = {
   phone: "06 00 00 00 00",
   email: "contact@example.com",
   links: [
-    { label: "Accueil", href: "#hero" },
+    { label: "Accueil", href: "#" },
     { label: "À propos", href: "#about" },
     { label: "Services", href: "#services" },
     { label: "Contact", href: "#contact" },

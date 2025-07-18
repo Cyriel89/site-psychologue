@@ -1,43 +1,73 @@
-import Link from "next/link";
-
-export default function PlanDuSite() {
+export default function SiteMap() {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold mb-6">Plan du site</h1>
+    <main className="max-w-3xl mx-auto px-4 py-16 min-h-screen">
+      <h1 className="text-3xl font-bold mb-8">Plan du site</h1>
 
-      <ul className="space-y-2 list-disc list-inside">
+      <ul className="space-y-4 text-gray-700">
         <li>
-          <Link href="/" className="text-blue-600 hover:underline">Accueil</Link>
+          <a href="#hero" className="text-blue-600 hover:underline font-medium">
+            Accueil
+          </a>
         </li>
         <li>
-          <a href="#about" className="text-blue-600 hover:underline">À propos</a>
+          <a href="#about" className="text-blue-600 hover:underline font-medium">
+            À propos
+          </a>
         </li>
         <li>
-          <a href="#services" className="text-blue-600 hover:underline">Services</a>
+          <a href="#services" className="text-blue-600 hover:underline font-medium">
+            Domaines d’intervention
+          </a>
         </li>
         <li>
-          <a href="#process" className="text-blue-600 hover:underline">Déroulement d’une séance</a>
+          <a href="#session" className="text-blue-600 hover:underline font-medium">
+            Déroulement d’une séance
+          </a>
         </li>
         <li>
-          <a href="#pricing" className="text-blue-600 hover:underline">Tarifs</a>
+          <a href="#prices" className="text-blue-600 hover:underline font-medium">
+            Tarifs
+          </a>
         </li>
         <li>
-          <a href="#partners" className="text-blue-600 hover:underline">Partenaires</a>
+          <a href="#partners" className="text-blue-600 hover:underline font-medium">
+            Partenaires
+          </a>
         </li>
         <li>
-          <a href="#location" className="text-blue-600 hover:underline">Lieu de consultation</a>
+          <a href="#location" className="text-blue-600 hover:underline font-medium">
+            Lieu de consultation
+          </a>
         </li>
         <li>
-          <a href="#faq" className="text-blue-600 hover:underline">FAQ</a>
+          <a href="#contact" className="text-blue-600 hover:underline font-medium">
+            Contact
+          </a>
         </li>
         <li>
-          <a href="#contact" className="text-blue-600 hover:underline">Contact</a>
+          <a href="#faq" className="text-blue-600 hover:underline font-medium">
+            FAQ
+          </a>
+        </li>
+      </ul>
+
+      <hr className="my-8 border-gray-300" />
+
+      <ul className="space-y-4 text-gray-700">
+        <li>
+          <a href="/legal-notice" className="text-blue-600 hover:underline font-medium">
+            Mentions légales
+          </a>
         </li>
         <li>
-          <Link href="/mentions-legales" className="text-blue-600 hover:underline">Mentions légales</Link>
+          <a href="/privacy-policy" className="text-blue-600 hover:underline font-medium">
+            Politique de confidentialité
+          </a>
         </li>
         <li>
-          <Link href="/politique-confidentialite" className="text-blue-600 hover:underline">Politique de confidentialité</Link>
+          <a href="/sitemap" className="text-blue-600 hover:underline font-medium">
+            Plan du site
+          </a>
         </li>
       </ul>
     </main>
