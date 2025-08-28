@@ -1,15 +1,346 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+/* =========================
+   Enums
+   ========================= */
+enum Role {
+  ADMIN
+  SUPPORT
+  CLIENT       // bénéficiaire
+}
+
+enum ServiceAudience {
+  INDIVIDUAL   // particuliers
+  COMPANY      // entreprises
+  EMPLOYEE     // salariés
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  NO_SHOW
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  DRAFT
+}
+
+enum ReactionType {
+  LIKE         // extensible
+}
+
+enum NotificationType {
+  APPOINTMENT_REMINDER
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+/* =========================
+   Utilisateurs / Auth
+   ========================= */
+model User {
+  id              String     @id @default(cuid())
+  email           String     @unique
+  passwordHash    String
+  role            Role       @default(CLIENT)
+
+  firstName       String?
+  lastName        String?
+  phone           String?
+
+  // Préférences de notifications
+  notifyByEmail   Boolean    @default(true)
+  notifyBySms     Boolean    @default(false)
+  smsConsentAt    DateTime?
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relations
+  appointments        Appointment[]        @relation("UserAppointments")       // rdv où il est client
+  appointmentsCreated Appointment[]        @relation("CreatedAppointments")    // rdv créés par lui (admin/support)
+  comments            Comment[]
+  reactions           Reaction[]
+  auditLogs           AuditLog[]           @relation("UserAuditLogs")
+  passwordResets      PasswordResetToken[]
+  notifications       Notification[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/* =========================
+   Médias réutilisables
+   ========================= */
+model Media {
+  id        String     @id @default(cuid())
+  url       String     // local (/uploads/...) ou externe (S3)
+  alt       String?
+  createdAt DateTime   @default(now())
+
+  // Back-relations (images principales)
+  services  Service[]  @relation("ServiceImage")
+  posts     BlogPost[] @relation("PostCoverImage")
+  partners  Partner[] @relation("LogoImage")
+}
+
+/* =========================
+   Réglages globaux (CMS)
+   ========================= */
+model Setting {
+  id     String @id @default("global") // singleton
+  theme  Json?
+  hero   Json?
+  about  Json?
+  // tu peux ajouter d’autres blocs JSON si besoin (ex: footer, partners…)
+}
+
+/* =========================
+   Services & Tarifs
+   ========================= */
+model Service {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  details     String?
+  iconKey     String                       // ex: "User", "HeartCrack"
+  audience    ServiceAudience
+  order       Int              @default(0)
+  visible     Boolean          @default(true)
+
+  imageId     String?
+  image       Media?           @relation("ServiceImage", fields: [imageId], references: [id])
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([audience])
+  @@index([order])
+}
+
+model Price {
+  id          String   @id @default(cuid())
+  title       String
+  price       String   // "60€", "Sur devis"
+  description String?
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+}
+
+/* =========================
+   Rendez-vous (calendrier)
+   ========================= */
+model Appointment {
+  id           String            @id @default(cuid())
+  status       AppointmentStatus @default(PENDING)
+  startAt      DateTime
+  endAt        DateTime
+  notes        String?
+
+  // Client (bénéficiaire)
+  userId       String?
+  user         User?             @relation("UserAppointments", fields: [userId], references: [id])
+
+  // Créé par (admin/support)
+  createdById  String?
+  createdBy    User?             @relation("CreatedAppointments", fields: [createdById], references: [id])
+
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  // Notifications liées
+  notifications Notification[]
+
+  @@index([userId])
+  @@index([startAt, endAt])
+}
+
+/* =========================
+   Notifications (rappels RDV)
+   ========================= */
+model Notification {
+  id            String               @id @default(cuid())
+  type          NotificationType
+  channel       NotificationChannel
+  status        NotificationStatus   @default(PENDING)
+  scheduledAt   DateTime
+  sentAt        DateTime?
+  errorMessage  String?
+
+  userId        String
+  user          User                 @relation(fields: [userId], references: [id])
+
+  appointmentId String
+  appointment   Appointment          @relation(fields: [appointmentId], references: [id])
+
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  // Évite les doublons : un rappel par canal et par RDV / user
+  @@unique([appointmentId, userId, type, channel])
+  @@index([userId])
+  @@index([appointmentId])
+}
+
+/* =========================
+   Blog (posts, catégories, tags, commentaires, likes)
+   ========================= */
+model BlogPost {
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  title        String
+  excerpt      String?
+  content      String       // Markdown/HTML/JSON (TipTap)
+  visibility   Visibility   @default(PUBLIC)
+  publishedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  coverImageId String?
+  coverImage   Media?       @relation("PostCoverImage", fields: [coverImageId], references: [id])
+
+  // Relations M-N implicites (Prisma crée une table de jonction auto)
+  categories   BlogCategory[]
+  tags         BlogTag[]
+
+  // Interactions
+  comments     Comment[]
+  reactions    Reaction[]
+}
+
+model BlogCategory {
+  id    String     @id @default(cuid())
+  slug  String     @unique
+  name  String
+  posts BlogPost[]
+}
+
+model BlogTag {
+  id    String     @id @default(cuid())
+  slug  String     @unique
+  name  String
+  posts BlogPost[]
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  content    String
+  createdAt  DateTime  @default(now())
+
+  // commentaire sur un post
+  postId     String
+  post       BlogPost  @relation(fields: [postId], references: [id])
+
+  // auteur (optionnel si tu veux autoriser des commentaires invités)
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+
+  // anti-abus basique
+  ip         String?
+  userAgent  String?
+
+  isApproved Boolean   @default(true)   // modération
+  isSpam     Boolean   @default(false)
+
+  @@index([postId])
+  @@index([userId])
+}
+
+model Reaction {
+  id        String       @id @default(cuid())
+  type      ReactionType @default(LIKE)
+  createdAt DateTime     @default(now())
+
+  postId    String
+  post      BlogPost     @relation(fields: [postId], references: [id])
+
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId, type]) // 1 like par user par post
+  @@index([postId])
+  @@index([userId])
+}
+
+/* =========================
+   FAQ
+   ========================= */
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+/* =========================
+   Partenaires
+   ========================= */
+model Partner {
+  id          String   @id @default(cuid())
+  name        String
+  url         String?      // site du partenaire
+  description String?
+  order       Int       @default(0)
+  visible     Boolean   @default(true)
+
+  logoId      String?
+  logo        Media?    @relation("LogoImage", fields: [logoId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([order])
+  @@index([visible])
+}
+
+
+/* =========================
+   Journalisation
+   ========================= */
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // ex: UPDATE_SERVICE, LOGIN, CREATE_POST…
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  userId    String?
+  user      User?    @relation("UserAuditLogs", fields: [userId], references: [id])
+
+  @@index([userId])
 }
