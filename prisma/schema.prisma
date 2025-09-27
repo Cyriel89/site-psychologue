@@ -116,10 +116,10 @@ model Media {
   createdAt DateTime @default(now())
 
   // Back-relations (images principales)
-  services Service[]  @relation("ServiceImage")
-  posts    BlogPost[] @relation("PostCoverImage")
-  partners Partner[]  @relation("LogoImage")
-  Setting  Setting[]
+  services   Service[]  @relation("ServiceImage")
+  posts      BlogPost[] @relation("PostCoverImage")
+  partners   Partner[]  @relation("LogoImage")
+  heroUsedBy Setting[]  @relation("HeroImage")
 }
 
 /**
@@ -135,7 +135,7 @@ model Setting {
 
   // Lien vers Media
   heroImageId String?
-  heroImage   Media?  @relation(fields: [heroImageId], references: [id])
+  heroImage   Media?  @relation("HeroImage", fields: [heroImageId], references: [id])
 }
 
 /**

@@ -2,15 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-
-type HeroData = {
-  name: string;
-  title: string;
-  subtitle: string;
-  cta: { label: string; href: string };
-  imageUrl: string;
-  imageAlt: string;
-};
+import { HeroData } from "./HeroLoader";
 
 export default function HeroClient({ hero }: { hero: HeroData }) {
   return (

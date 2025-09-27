@@ -1,5 +1,5 @@
 import Hero from "@/sections/Hero/HeroWrapper";
-import About from "@/sections/About";
+import About from "@/sections/About/AboutWrapper";
 import Services from "@/sections/Services";
 import SessionSteps from "@/sections/SessionSteps";
 import Prices from "@/sections/Prices";

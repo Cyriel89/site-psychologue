@@ -1,10 +1,10 @@
 "use client";
 
-import { aboutContent } from "@/content/about";
 import { motion } from "framer-motion";
 import { User, Target, HeartHandshake } from "lucide-react";
+import { AboutData } from "./AboutLoader";
 
-export default function About() {
+export default function AboutClient({ about }: { about: AboutData }) {
   return (
     <section
       id="about"
@@ -18,7 +18,7 @@ export default function About() {
         transition={{ duration: 1 }}
       >
         <h2 className="text-3xl md:text-4xl font-bold text-primary text-center pt-11 lg:pt-0 mb-12">
-          {aboutContent.title}
+          {about.title}
         </h2>
 
         {/* Présentation */}
@@ -27,7 +27,7 @@ export default function About() {
           <div>
             <h3 className="text-xl font-semibold text-gray-800">Présentation</h3>
             <p className="text-lg text-textLight leading-relaxed">
-              {aboutContent.description.presentation}
+              {about.description.presentation}
             </p>
           </div>
         </div>
@@ -38,7 +38,7 @@ export default function About() {
           <div>
             <h3 className="text-xl font-semibold text-gray-800">Mission</h3>
             <p className="text-lg text-textLight leading-relaxed">
-              {aboutContent.description.mission}
+              {about.description.mission}
             </p>
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function About() {
           <div>
             <h3 className="text-xl font-semibold text-gray-800">Valeurs</h3>
             <p className="text-lg text-textLight leading-relaxed">
-              {aboutContent.description.goal}
+              {about.description.goal}
             </p>
           </div>
         </div>
