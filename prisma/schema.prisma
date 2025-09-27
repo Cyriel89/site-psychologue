@@ -7,19 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* =========================
-   Enums
-   ========================= */
+/**
+ * =========================
+ * Enums
+ * =========================
+ */
 enum Role {
   ADMIN
   SUPPORT
-  CLIENT       // bénéficiaire
+  CLIENT // bénéficiaire
 }
 
 enum ServiceAudience {
-  INDIVIDUAL   // particuliers
-  COMPANY      // entreprises
-  EMPLOYEE     // salariés
+  INDIVIDUAL // particuliers
+  COMPANY // entreprises
+  EMPLOYEE // salariés
 }
 
 enum AppointmentStatus {
@@ -36,7 +38,7 @@ enum Visibility {
 }
 
 enum ReactionType {
-  LIKE         // extensible
+  LIKE // extensible
 }
 
 enum NotificationType {
@@ -55,32 +57,34 @@ enum NotificationStatus {
   CANCELLED
 }
 
-/* =========================
-   Utilisateurs / Auth
-   ========================= */
+/**
+ * =========================
+ * Utilisateurs / Auth
+ * =========================
+ */
 model User {
-  id              String     @id @default(cuid())
-  email           String     @unique
-  passwordHash    String
-  role            Role       @default(CLIENT)
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+  role         Role   @default(CLIENT)
 
-  firstName       String?
-  lastName        String?
-  phone           String?
+  firstName String?
+  lastName  String?
+  phone     String?
 
   // Préférences de notifications
-  notifyByEmail   Boolean    @default(true)
-  notifyBySms     Boolean    @default(false)
+  notifyByEmail   Boolean   @default(true)
+  notifyBySms     Boolean   @default(false)
   smsConsentAt    DateTime?
   emailVerifiedAt DateTime?
   phoneVerifiedAt DateTime?
 
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  appointments        Appointment[]        @relation("UserAppointments")       // rdv où il est client
-  appointmentsCreated Appointment[]        @relation("CreatedAppointments")    // rdv créés par lui (admin/support)
+  appointments        Appointment[]        @relation("UserAppointments") // rdv où il est client
+  appointmentsCreated Appointment[]        @relation("CreatedAppointments") // rdv créés par lui (admin/support)
   comments            Comment[]
   reactions           Reaction[]
   auditLogs           AuditLog[]           @relation("UserAuditLogs")
@@ -89,95 +93,107 @@ model User {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
+  id        String    @id @default(cuid())
+  token     String    @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
 }
 
-/* =========================
-   Médias réutilisables
-   ========================= */
+/**
+ * =========================
+ * Médias réutilisables
+ * =========================
+ */
 model Media {
-  id        String     @id @default(cuid())
-  url       String     // local (/uploads/...) ou externe (S3)
+  id        String   @id @default(cuid())
+  url       String // local (/uploads/...) ou externe (S3)
   alt       String?
-  createdAt DateTime   @default(now())
+  createdAt DateTime @default(now())
 
   // Back-relations (images principales)
-  services  Service[]  @relation("ServiceImage")
-  posts     BlogPost[] @relation("PostCoverImage")
-  partners  Partner[] @relation("LogoImage")
+  services Service[]  @relation("ServiceImage")
+  posts    BlogPost[] @relation("PostCoverImage")
+  partners Partner[]  @relation("LogoImage")
+  Setting  Setting[]
 }
 
-/* =========================
-   Réglages globaux (CMS)
-   ========================= */
+/**
+ * =========================
+ * Réglages globaux (CMS)
+ * =========================
+ */
 model Setting {
-  id     String @id @default("global") // singleton
-  theme  Json?
-  hero   Json?
-  about  Json?
-  // tu peux ajouter d’autres blocs JSON si besoin (ex: footer, partners…)
+  id    String @id @default("global") // singleton
+  theme Json?
+  hero  Json?
+  about Json?
+
+  // Lien vers Media
+  heroImageId String?
+  heroImage   Media?  @relation(fields: [heroImageId], references: [id])
 }
 
-/* =========================
-   Services & Tarifs
-   ========================= */
+/**
+ * =========================
+ * Services & Tarifs
+ * =========================
+ */
 model Service {
   id          String          @id @default(cuid())
   title       String
   description String
   details     String?
-  iconKey     String                       // ex: "User", "HeartCrack"
+  iconKey     String // ex: "User", "HeartCrack"
   audience    ServiceAudience
-  order       Int              @default(0)
-  visible     Boolean          @default(true)
+  order       Int             @default(0)
+  visible     Boolean         @default(true)
 
-  imageId     String?
-  image       Media?           @relation("ServiceImage", fields: [imageId], references: [id])
+  imageId String?
+  image   Media?  @relation("ServiceImage", fields: [imageId], references: [id])
 
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([audience])
   @@index([order])
 }
 
 model Price {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
-  price       String   // "60€", "Sur devis"
+  price       String // "60€", "Sur devis"
   description String?
-  order       Int      @default(0)
-  visible     Boolean  @default(true)
+  order       Int     @default(0)
+  visible     Boolean @default(true)
 }
 
-/* =========================
-   Rendez-vous (calendrier)
-   ========================= */
+/**
+ * =========================
+ * Rendez-vous (calendrier)
+ * =========================
+ */
 model Appointment {
-  id           String            @id @default(cuid())
-  status       AppointmentStatus @default(PENDING)
-  startAt      DateTime
-  endAt        DateTime
-  notes        String?
+  id      String            @id @default(cuid())
+  status  AppointmentStatus @default(PENDING)
+  startAt DateTime
+  endAt   DateTime
+  notes   String?
 
   // Client (bénéficiaire)
-  userId       String?
-  user         User?             @relation("UserAppointments", fields: [userId], references: [id])
+  userId String?
+  user   User?   @relation("UserAppointments", fields: [userId], references: [id])
 
   // Créé par (admin/support)
-  createdById  String?
-  createdBy    User?             @relation("CreatedAppointments", fields: [createdById], references: [id])
+  createdById String?
+  createdBy   User?   @relation("CreatedAppointments", fields: [createdById], references: [id])
 
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Notifications liées
   notifications Notification[]
@@ -186,26 +202,28 @@ model Appointment {
   @@index([startAt, endAt])
 }
 
-/* =========================
-   Notifications (rappels RDV)
-   ========================= */
+/**
+ * =========================
+ * Notifications (rappels RDV)
+ * =========================
+ */
 model Notification {
-  id            String               @id @default(cuid())
-  type          NotificationType
-  channel       NotificationChannel
-  status        NotificationStatus   @default(PENDING)
-  scheduledAt   DateTime
-  sentAt        DateTime?
-  errorMessage  String?
+  id           String              @id @default(cuid())
+  type         NotificationType
+  channel      NotificationChannel
+  status       NotificationStatus  @default(PENDING)
+  scheduledAt  DateTime
+  sentAt       DateTime?
+  errorMessage String?
 
-  userId        String
-  user          User                 @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   appointmentId String
-  appointment   Appointment          @relation(fields: [appointmentId], references: [id])
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
 
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Évite les doublons : un rappel par canal et par RDV / user
   @@unique([appointmentId, userId, type, channel])
@@ -213,30 +231,32 @@ model Notification {
   @@index([appointmentId])
 }
 
-/* =========================
-   Blog (posts, catégories, tags, commentaires, likes)
-   ========================= */
+/**
+ * =========================
+ * Blog (posts, catégories, tags, commentaires, likes)
+ * =========================
+ */
 model BlogPost {
-  id           String       @id @default(cuid())
-  slug         String       @unique
-  title        String
-  excerpt      String?
-  content      String       // Markdown/HTML/JSON (TipTap)
-  visibility   Visibility   @default(PUBLIC)
-  publishedAt  DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  excerpt     String?
+  content     String // Markdown/HTML/JSON (TipTap)
+  visibility  Visibility @default(PUBLIC)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   coverImageId String?
-  coverImage   Media?       @relation("PostCoverImage", fields: [coverImageId], references: [id])
+  coverImage   Media?  @relation("PostCoverImage", fields: [coverImageId], references: [id])
 
   // Relations M-N implicites (Prisma crée une table de jonction auto)
-  categories   BlogCategory[]
-  tags         BlogTag[]
+  categories BlogCategory[]
+  tags       BlogTag[]
 
   // Interactions
-  comments     Comment[]
-  reactions    Reaction[]
+  comments  Comment[]
+  reactions Reaction[]
 }
 
 model BlogCategory {
@@ -254,24 +274,24 @@ model BlogTag {
 }
 
 model Comment {
-  id         String    @id @default(cuid())
-  content    String
-  createdAt  DateTime  @default(now())
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
 
   // commentaire sur un post
-  postId     String
-  post       BlogPost  @relation(fields: [postId], references: [id])
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id])
 
   // auteur (optionnel si tu veux autoriser des commentaires invités)
-  userId     String?
-  user       User?     @relation(fields: [userId], references: [id])
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   // anti-abus basique
-  ip         String?
-  userAgent  String?
+  ip        String?
+  userAgent String?
 
-  isApproved Boolean   @default(true)   // modération
-  isSpam     Boolean   @default(false)
+  isApproved Boolean @default(true) // modération
+  isSpam     Boolean @default(false)
 
   @@index([postId])
   @@index([userId])
@@ -282,20 +302,22 @@ model Reaction {
   type      ReactionType @default(LIKE)
   createdAt DateTime     @default(now())
 
-  postId    String
-  post      BlogPost     @relation(fields: [postId], references: [id])
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id])
 
-  userId    String
-  user      User         @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   @@unique([postId, userId, type]) // 1 like par user par post
   @@index([postId])
   @@index([userId])
 }
 
-/* =========================
-   FAQ
-   ========================= */
+/**
+ * =========================
+ * FAQ
+ * =========================
+ */
 model Faq {
   id        String   @id @default(cuid())
   question  String
@@ -308,39 +330,42 @@ model Faq {
   @@index([order])
 }
 
-/* =========================
-   Partenaires
-   ========================= */
+/**
+ * =========================
+ * Partenaires
+ * =========================
+ */
 model Partner {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  url         String?      // site du partenaire
+  url         String? // site du partenaire
   description String?
-  order       Int       @default(0)
-  visible     Boolean   @default(true)
+  order       Int     @default(0)
+  visible     Boolean @default(true)
 
-  logoId      String?
-  logo        Media?    @relation("LogoImage", fields: [logoId], references: [id])
+  logoId String?
+  logo   Media?  @relation("LogoImage", fields: [logoId], references: [id])
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([order])
   @@index([visible])
 }
 
-
-/* =========================
-   Journalisation
-   ========================= */
+/**
+ * =========================
+ * Journalisation
+ * =========================
+ */
 model AuditLog {
   id        String   @id @default(cuid())
-  action    String   // ex: UPDATE_SERVICE, LOGIN, CREATE_POST…
+  action    String // ex: UPDATE_SERVICE, LOGIN, CREATE_POST…
   payload   Json?
   createdAt DateTime @default(now())
 
-  userId    String?
-  user      User?    @relation("UserAuditLogs", fields: [userId], references: [id])
+  userId String?
+  user   User?   @relation("UserAuditLogs", fields: [userId], references: [id])
 
   @@index([userId])
 }

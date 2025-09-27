@@ -1,10 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { heroContent } from "@/content/hero";
 import { motion } from "framer-motion";
 
-export default function Hero() {
+type HeroData = {
+  name: string;
+  title: string;
+  subtitle: string;
+  cta: { label: string; href: string };
+  imageUrl: string;
+  imageAlt: string;
+};
+
+export default function HeroClient({ hero }: { hero: HeroData }) {
   return (
     <section className="min-h-screen flex flex-col lg:flex-row items-center justify-start lg:justify-center px-4 bg-secondary">
       {/* Image */}
@@ -16,8 +24,8 @@ export default function Hero() {
       >
         <div className="relative w-72 h-72 md:w-96 md:h-96 lg:w-[500px] lg:h-[500px] rounded-xl overflow-hidden shadow-xl">
           <Image
-            src={heroContent.image.src}
-            alt={heroContent.image.alt}
+            src={hero.imageUrl}
+            alt={hero.imageAlt}
             fill
             className="object-cover"
             priority
@@ -32,20 +40,20 @@ export default function Hero() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.3, duration: 1 }}
       >
-        <h2 className="text-lg md:text-xl text-textLight mb-2">{heroContent.name}</h2>
+        <h2 className="text-lg md:text-xl text-textLight mb-2">{hero.name}</h2>
         <h1 className="text-4xl md:text-6xl font-bold mb-4 text-primary">
-          {heroContent.title}
+          {hero.title}
         </h1>
         <p className="text-lg md:text-xl text-textLight mb-8">
-          {heroContent.subtitle}
+          {hero.subtitle}
         </p>
         <motion.a
-          href={heroContent.cta.href}
+          href={hero.cta.href}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="inline-block px-6 py-3 bg-accent text-white rounded-xl text-lg hover:bg-green-600 transition"
         >
-          {heroContent.cta.label}
+          {hero.cta.label}
         </motion.a>
       </motion.div>
     </section>
