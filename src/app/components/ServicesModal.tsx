@@ -6,14 +6,17 @@ import { X } from "lucide-react";
 import Image from "next/image";
 
 interface ServiceModalProps {
+  isOpen: boolean;
+  onClose: () => void;
   title: string;
   content: string;
   imageUrl: string;
-  isOpen: boolean;
-  onClose: () => void;
+  imageAlt?: string;
+  priceLabel?: string;
+  cta?: { label: string; href: string };
 }
 
-export default function ServiceModal({ title, content, imageUrl, isOpen, onClose }: ServiceModalProps) {
+export default function ServiceModal({ title, content, imageUrl, imageAlt, isOpen, onClose, priceLabel, cta }: ServiceModalProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -52,7 +55,7 @@ export default function ServiceModal({ title, content, imageUrl, isOpen, onClose
             <div className="relative md:w-1/2 h-64 md:h-auto">
                 <Image
                     src={imageUrl}
-                    alt={title}
+                    alt={imageAlt || title}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -63,15 +66,16 @@ export default function ServiceModal({ title, content, imageUrl, isOpen, onClose
             <div className="md:w-1/2 my-4 p-6 flex flex-col justify-center border-t md:border-t-0 md:border-l border-gray-200">
               <h3 className="text-2xl font-bold mb-4 text-primary">{title}</h3>
               <p className="text-gray-700 leading-relaxed">{content}</p>
+              <p className="text-gray-700 leading-relaxed">{priceLabel}</p>
               <div className="mt-6 flex justify-end">
                 <motion.a
-                  href="#contact" // Replace with actual link
+                  href={cta?.href}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onClose}
                   className="inline-block px-6 py-3 bg-accent text-white rounded-xl text-lg hover:bg-green-600 transition"
                 >
-                  Prendre rendez-vous
+                  {cta?.label || "Contactez-moi"}
                 </motion.a>
               </div>
             </div>

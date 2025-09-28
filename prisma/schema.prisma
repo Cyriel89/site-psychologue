@@ -12,6 +12,11 @@ datasource db {
  * Enums
  * =========================
  */
+enum PriceType {
+  FIXED
+  QUOTE
+}
+
 enum Role {
   ADMIN
   SUPPORT
@@ -144,14 +149,19 @@ model Setting {
  * =========================
  */
 model Service {
-  id          String          @id @default(cuid())
-  title       String
-  description String
-  details     String?
-  iconKey     String // ex: "User", "HeartCrack"
-  audience    ServiceAudience
-  order       Int             @default(0)
-  visible     Boolean         @default(true)
+  id               String          @id @default(cuid())
+  slug             String          @unique
+  title            String
+  shortDescription String
+  longDescription  String
+  iconKey          String // ex: "User", "HeartCrack"
+  audience         ServiceAudience
+  priceType        PriceType
+  priceAmount      String? // ex: "60€", "Sur devis"
+  priceCurrency    String?         @default("EUR") // ISO 4217
+  priceLabel       String? // ex: "60€", "Sur devis"
+  order            Int             @default(0)
+  visible          Boolean         @default(true)
 
   imageId String?
   image   Media?  @relation("ServiceImage", fields: [imageId], references: [id])

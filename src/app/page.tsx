@@ -1,8 +1,6 @@
 import Hero from "@/sections/Hero/HeroWrapper";
 import About from "@/sections/About/AboutWrapper";
-import Services from "@/sections/Services";
-import SessionSteps from "@/sections/SessionSteps";
-import Prices from "@/sections/Prices";
+import Services from "@/sections/Services/ServicesWrapper";
 import Partners from "@/sections/Partners";
 import Location from "@/sections/Location";
 import Contact from "@/sections/Contact";
@@ -14,8 +12,6 @@ export default function Home() {
       <Hero />
       <About />
       <Services />
-      <SessionSteps />
-      <Prices />
       <Partners />
       <Location />
       <Contact />

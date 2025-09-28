@@ -20,7 +20,7 @@ export default function Footer() {
           </p>
 
           {/* Réseaux sociaux */}
-          <div className="flex space-x-4 mt-4">
+          {/*<div className="flex space-x-4 mt-4">
             <a href="#" aria-label="LinkedIn" className="hover:bg-white/10 p-2 rounded-full transition">
               <Linkedin className="w-6 h-6 text-gray-300 hover:text-white" />
             </a>
@@ -30,7 +30,7 @@ export default function Footer() {
             <a href="#" aria-label="Facebook" className="hover:bg-white/10 p-2 rounded-full transition">
               <Facebook className="w-6 h-6 text-gray-300 hover:text-white" />
             </a>
-          </div>
+          </div>*/}
         </div>
 
         {/* Navigation */}

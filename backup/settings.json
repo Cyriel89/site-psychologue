@@ -1,0 +1,30 @@
+{
+  "setting": {
+    "id": "global",
+    "hero": {
+      "cta": {
+        "href": "#contact",
+        "label": "Prendre rendez-vous"
+      },
+      "name": "Pauline Diné",
+      "title": "Psychologue du travail",
+      "subtitle": "Retrouvez équilibre et sérénité au travail"
+    },
+    "about": {
+      "title": "À propos",
+      "description": {
+        "goal": "Mon objectif : vous offrir un espace sécurisé pour comprendre, exprimer, évoluer.",
+        "mission": "J'accompagne les adultes en questionnement personnel ou professionnel, en souffrance au travail ou en quête d’un mieux-être. Mon travail s'appuie sur une approche intégrative, mêlant rigueur scientifique et sensibilité humaine.",
+        "presentation": "Je suis Pauline Diné, psychologue du travail basée à Ancenis. Mon approche est centrée sur l'écoute, la bienveillance et l’accompagnement au rythme de chacun."
+      }
+    },
+    "heroImageId": "cmfwqeqp80000dd94w0kizmhw"
+  },
+  "media": {
+    "heroImage": {
+      "id": "cmfwqeqp80000dd94w0kizmhw",
+      "url": "/images/hero.jpg",
+      "alt": "Pauline Diné - Psychologue du travail"
+    }
+  }
+}
