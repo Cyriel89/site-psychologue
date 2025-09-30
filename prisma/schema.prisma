@@ -137,6 +137,7 @@ model Setting {
   theme Json?
   hero  Json?
   about Json?
+  contact Json?
 
   // Lien vers Media
   heroImageId String?

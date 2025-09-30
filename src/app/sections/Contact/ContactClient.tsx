@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { contactContent } from "@/content/contact";
 import { motion } from "framer-motion";
+import { ContactData } from "./ContactLoader";
 
-export default function Contact() {
+export default function Contact({ contact }: { contact: ContactData }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -81,7 +81,8 @@ export default function Contact() {
           transition={{ duration: 0.6 }}
           className="space-y-6 bg-gray-50 p-6 rounded-xl shadow-md"
         >
-          <h2 className="text-2xl font-bold text-primary mb-4">Contact</h2>
+          <h2 className="text-2xl font-bold text-primary mb-4">{contact.title}</h2>
+          {contact.intro && <p className="text-gray-600">{contact.intro}</p>}
           <input
             type="text"
             name="website"
@@ -93,7 +94,7 @@ export default function Contact() {
           />
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              {contactContent.form.name.label}
+              Nom & Prénom *
             </label>
             <input
               type="text"
@@ -107,7 +108,7 @@ export default function Contact() {
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              {contactContent.form.email.label}
+              Adresse e-mail *
             </label>
             <input
               type="email"
@@ -121,7 +122,7 @@ export default function Contact() {
           </div>
           <div>
             <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
-              {contactContent.form.subject.label}
+              Sujet *
             </label>
             <input
               type="text"
@@ -134,7 +135,7 @@ export default function Contact() {
           </div>
           <div>
             <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-              {contactContent.form.message.label}
+              Message *
             </label>
             <textarea
               id="message"
@@ -157,7 +158,7 @@ export default function Contact() {
               onChange={handleChange}
             />
             <label htmlFor="rgpd" className="text-sm text-gray-700">
-              {contactContent.form.rgpd.label}
+              {contact.rgpdLabel}
             </label>
           </div>
           <button
@@ -165,11 +166,11 @@ export default function Contact() {
             disabled={status === "sending"}
             className="w-full px-6 py-3 bg-accent text-white rounded-xl text-lg hover:bg-green-600 transition"
           >
-            {status === "sending" ? "Envoi en cours..." : contactContent.submitButtonText}
+            {status === "sending" ? "Envoi en cours..." : "Envoyer"}
           </button>
 
           {status === "success" && (
-            <p className="text-green-600">Votre message a été envoyé avec succès.</p>
+            <p className="text-green-600">{contact.successMessage}</p>
           )}
           {status === "error" && (
             <p className="text-red-600">{errorMsg}</p>
@@ -184,15 +185,39 @@ export default function Contact() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="space-y-4"
         >
-          <h3 className="text-xl font-semibold">{contactContent.infoBox.title}</h3>
-          <div className="space-y-2">
-            {contactContent.infoBox.items.map((item, index) => (
-              <p key={index} className="text-textLight flex items-center gap-2">
-                <span className="text-2xl">{item.icon}</span>
-                {item.text}
-              </p>
-            ))}
-          </div>
+          {contact.address && (
+            <p className="text-gray-700">
+              <span className="font-semibold">📍 Adresse :</span> {contact.address}
+            </p>
+          )}
+          {contact.phone && (
+            <p className="text-gray-700">
+              <span className="font-semibold">📞 Téléphone :</span>{" "}
+              <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className="text-blue-600 hover:underline">
+                {contact.phone}
+              </a>
+            </p>
+          )}
+          {contact.email && (
+            <p className="text-gray-700">
+              <span className="font-semibold">📧 Email :</span>{" "}
+              <a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline">
+                {contact.email}
+              </a>
+            </p>
+          )}
+          {contact.openingHours && (
+            <p className="text-gray-700">
+              <span className="font-semibold">🕒 Horaires d'ouverture :</span> {contact.openingHours}
+            </p>
+          )}
+          {/* Liens de prise de RDV si fournis */}
+          <a
+            href={contact.booking}
+            className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
+            Prendre RDV en ligne
+          </a>
         </motion.div>
       </div>
     </section>
