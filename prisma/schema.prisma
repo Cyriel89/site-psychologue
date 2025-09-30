@@ -365,6 +365,28 @@ model Partner {
 
 /**
  * =========================
+ * Localisation
+ * =========================
+ */
+ model Location {
+  id             String   @id @default("primary")
+  title          String
+  subtitle       String
+  addressLine1   String
+  addressLine2   String?
+  city           String
+  postalCode     String
+  country        String
+  latitude       Float
+  longitude      Float
+  mapUrl         String?
+  openingHours   Json? // ex: { "monday": "9:00-18:00", ... }
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+/**
+ * =========================
  * Journalisation
  * =========================
  */

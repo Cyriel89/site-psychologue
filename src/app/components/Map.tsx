@@ -5,10 +5,11 @@ import { MapContainer, TileLayer, Marker, Polyline, Tooltip, useMap } from "reac
 import { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import type { LocationData } from "@/sections/Location/LocationLoader";
 
-// Coordonnées du cabinet
-const professionalPosition: LatLngExpression = [47.21660, -1.55133];
-
+type MapProps = {
+    professionalPosition?: [number, number];
+};
 // Fonction utilitaire pour calculer la distance
 function getDistanceInKm(from: LatLngExpression, to: LatLngExpression): number {
     const [lat1, lon1] = from as [number, number];
@@ -35,8 +36,7 @@ function ForceResize() {
     return null;
 }
 
-export default function Map() {
-
+export default function Map({professionalPosition}: MapProps) {
     const [clientPosition, setClientPosition] = useState<LatLngExpression | null>(null);
 
     useEffect(() => {
@@ -54,9 +54,9 @@ export default function Map() {
     }, []);
 
     const distance = useMemo(() => {
-        if (!clientPosition) return null;
+        if (!clientPosition || !professionalPosition) return null;
         return getDistanceInKm(clientPosition, professionalPosition);
-    }, [clientPosition]);
+    }, [clientPosition, professionalPosition]);
 
     const centerPosition = useMemo(() => {
         if (!clientPosition) return professionalPosition;
@@ -87,11 +87,13 @@ export default function Map() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png"
             />
-            <Marker position={professionalPosition}>
-                <Tooltip direction="top" offset={[-15, -10]} permanent>
-                    Cabinet
-                </Tooltip>
-            </Marker>
+            {professionalPosition && (
+                <Marker position={professionalPosition}>
+                    <Tooltip direction="top" offset={[-15, -10]} permanent>
+                        Cabinet
+                    </Tooltip>
+                </Marker>
+            )}
             {clientPosition && (
                 <>
                     <Marker position={clientPosition}>
@@ -99,15 +101,19 @@ export default function Map() {
                             Vous
                         </Tooltip>
                     </Marker>
-                    <Polyline positions={[clientPosition, professionalPosition]} color="blue" />
-                    <Marker position={centerPosition} opacity={0}>
-                        <Tooltip permanent direction="bottom" offset={[0, 20]}>
-                            <div>
-                                Vous êtes à <span style={{ color: 'green' }}>{distance} km</span> <br />
-                                de votre bien-être
-                            </div>
-                        </Tooltip>
-                    </Marker>
+                    {professionalPosition && (
+                        <Polyline positions={[clientPosition, professionalPosition]} color="blue" />
+                    )}
+                    {centerPosition && (
+                        <Marker position={centerPosition} opacity={0}>
+                            <Tooltip permanent direction="bottom" offset={[0, 20]}>
+                                <div>
+                                    Vous êtes à <span style={{ color: 'green' }}>{distance} km</span> <br />
+                                    de votre bien-être
+                                </div>
+                            </Tooltip>
+                        </Marker>
+                    )}
                 </>
             )}
         </MapContainer>

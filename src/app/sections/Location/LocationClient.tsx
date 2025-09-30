@@ -1,11 +1,11 @@
 "use client";
 
-import { locationContent } from "@/content/location";
+import type { LocationData } from "./LocationLoader";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 
-export default function Location() {
+export default function Location({ location }: { location: LocationData }) {
   return (
     <section className="min-h-screen w-full px-4 py-16 bg-secondary flex items-center justify-center">
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -18,27 +18,27 @@ export default function Location() {
           className="space-y-4"
         >
           <h2 className="text-3xl font-bold text-primary mb-2">
-            {locationContent.title}
+            {location.title}
           </h2>
-          <p className="text-textLight">{locationContent.subtitle}</p>
+          <p className="text-textLight">{location.subtitle}</p>
           <p className="text-textLight">
-            {locationContent.addresses.title}{" "}
-            <strong>{locationContent.addresses.address}</strong>
+            Adresse du cabinet :
+            <strong>{location.address}, {location.cityLine}</strong>
           </p>
-          <p className="text-textLight">{locationContent.addresses.description}</p>
+          <p className="text-textLight">{location.notes}</p>
           <a
-            href={locationContent.addresses.mapLink}
+            href={location.mapUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block text-primary font-medium hover:underline"
           >
-            {locationContent.addresses.mapText}
+            Voir sur Google Maps
           </a>
           <div className="mt-4">
             <p className="text-textLight font-semibold">
-              {locationContent.addresses.openingHoursTitle}
+              Horaires d'ouverture :
             </p>
-            {locationContent.addresses.openingHours.map((item, index) => (
+            {location.openingHours.map((item, index) => (
               <p key={index} className="text-textLight">
                 {item.day} {item.hours}
               </p>
@@ -54,7 +54,9 @@ export default function Location() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="h-[400px] w-full bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden"
         >
-          <Map />
+          <Map
+            professionalPosition={[location.lat, location.lon]}
+          />
         </motion.div>
       </div>
 
