@@ -4,7 +4,7 @@ import Services from "@/sections/Services/ServicesWrapper";
 import Partners from "@/sections/Partners/PartnersWrapper";
 import Location from "@/sections/Location/LocationWrapper";
 import Contact from "@/sections/Contact/ContactWrapper";
-import Faq from "@/sections/Faq";
+import Faq from "@/sections/Faq/FaqWrapper";
 
 export default function Home() {
   return (
