@@ -31,6 +31,13 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  // dans middleware.ts, avant le return NextResponse.next()
+  if (path.startsWith("/admin")) {
+    // empêche mise en cache navigateur des pages admin
+    const res = NextResponse.next();
+    res.headers.set("Cache-Control", "no-store");
+    return res;
+}
   return NextResponse.next();
 }
 
