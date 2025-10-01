@@ -76,7 +76,7 @@ model User {
   firstName String?
   lastName  String?
   phone     String?
-
+  isActive  Boolean @default(true) // peut se connecter
   // Préférences de notifications
   notifyByEmail   Boolean   @default(true)
   notifyBySms     Boolean   @default(false)
