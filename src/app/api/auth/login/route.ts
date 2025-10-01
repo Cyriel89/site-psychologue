@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/crypto";
-import { createSessionCookie } from "@/lib/session";
+import { buildSessionToken, COOKIE_NAME } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,11 +23,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Compte désactivé" }, { status: 403 });
     }
 
-    // Rôle basique: "ADMIN" / "SUPPORT" / "CLIENT"
-    createSessionCookie({ userId: user.id, role: user.role });
+    const { token, maxAge } = buildSessionToken({ userId: user.id, role: user.role });
 
-    return NextResponse.json({ message: "OK" });
-  } catch (e) {
-    return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
+    const res = NextResponse.json({ message: "OK" });
+    res.cookies.set(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge,
+    });
+    res.headers.set("Cache-Control", "no-store");
+    return res;
+  } catch {
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

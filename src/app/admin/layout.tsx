@@ -1,13 +1,15 @@
 import Link from "next/link";
-import SessionGuard from "./_components/SessionGuard";
+import { redirect } from "next/navigation";
+import { requireAdminOrSupport } from "@/lib/authServer";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
-export default function AdminLayout({ children }: { children: React.ReactNode}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const auth = requireAdminOrSupport();
+  if (!auth) redirect("/"); 
   return (
     <div className="min-h-screen grid grid-cols-[240px_1fr]">
-      <SessionGuard />
       <aside className="bg-gray-900 text-gray-100 p-4 space-y-3">
         <div className="font-bold text-lg mb-4">Admin</div>
         <nav className="space-y-2 text-sm">
