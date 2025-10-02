@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { label: "Accueil", href: "#hero" },
@@ -16,9 +17,13 @@ const navLinks = [
 ];
 
 export default function Header() {
+  const pathname = usePathname();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // ✅ Ne pas rendre le header sur les routes admin
+  if (pathname.startsWith("/admin")) return null;
 
   useEffect(() => {
     const updateScroll = () => {
@@ -28,7 +33,7 @@ export default function Header() {
       setScrollProgress(progress);
       setIsScrolled(scrollTop > 30);
 
-      // Fermer le menu s’il est ouvert
+      // Ferme le menu au scroll si ouvert
       if (menuOpen) setMenuOpen(false);
     };
 
@@ -37,13 +42,17 @@ export default function Header() {
   }, [menuOpen]);
 
   useEffect(() => {
-    // Active le smooth scroll global
+    // Smooth scroll global (site public)
     document.documentElement.style.scrollBehavior = "smooth";
+    return () => {
+      // Optionnel : restaurer si besoin
+      // document.documentElement.style.scrollBehavior = "auto";
+    };
   }, []);
 
   return (
     <header className="fixed top-0 left-0 w-full z-50">
-      {/* Scroll bar */}
+      {/* Scroll bar avec fond opaque pour éviter toute transparence */}
       <div className="bg-white">
         <div
           className="h-1 bg-blue-600 transition-all duration-150"
@@ -107,7 +116,7 @@ export default function Header() {
                     <a
                       href={link.href}
                       className="text-gray-800 hover:text-blue-600 text-base font-medium"
-                      onClick={() => setMenuOpen(false)} // Ferme le menu au clic
+                      onClick={() => setMenuOpen(false)}
                     >
                       {link.label}
                     </a>
