@@ -172,6 +172,7 @@ model Service {
 
   @@index([audience])
   @@index([order])
+  @@unique([order, audience])
 }
 
 model Price {

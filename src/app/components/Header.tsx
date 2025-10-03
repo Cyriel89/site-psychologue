@@ -18,12 +18,12 @@ const navLinks = [
 
 export default function Header() {
   const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
+
+  // ✅ TOUS les hooks sont appelés, quelle que soit la route
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // ✅ Ne pas rendre le header sur les routes admin
-  if (pathname.startsWith("/admin")) return null;
 
   useEffect(() => {
     const updateScroll = () => {
@@ -32,23 +32,18 @@ export default function Header() {
       const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
       setScrollProgress(progress);
       setIsScrolled(scrollTop > 30);
-
-      // Ferme le menu au scroll si ouvert
       if (menuOpen) setMenuOpen(false);
     };
-
     window.addEventListener("scroll", updateScroll);
     return () => window.removeEventListener("scroll", updateScroll);
   }, [menuOpen]);
 
   useEffect(() => {
-    // Smooth scroll global (site public)
     document.documentElement.style.scrollBehavior = "smooth";
-    return () => {
-      // Optionnel : restaurer si besoin
-      // document.documentElement.style.scrollBehavior = "auto";
-    };
   }, []);
+
+  // ✅ On peut retourner null APRÈS avoir appelé les hooks
+  if (isAdmin) return null;
 
   return (
     <header className="fixed top-0 left-0 w-full z-50">
