@@ -33,7 +33,7 @@ export default function Contact({ contact }: { contact: ContactData }) {
     setStatus("sending");
     setErrorMsg("");
 
-    if (!formData.name || !formData.email || !formData.message || !formData.rgpd) {
+    if (!formData.name || !formData.email || !formData.subject ||!formData.message || !formData.rgpd) {
       setErrorMsg("Merci de remplir tous les champs obligatoires.");
       setStatus("error");
       return;
@@ -42,7 +42,7 @@ export default function Contact({ contact }: { contact: ContactData }) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, timeStamp: formTimeStamp }),
+        body: JSON.stringify({ ...formData, timestamp: formTimeStamp }),
       });
 
       const data = await res.json();
@@ -128,6 +128,7 @@ export default function Contact({ contact }: { contact: ContactData }) {
               type="text"
               id="subject"
               name="subject"
+              required
               className="mt-1 block w-full rounded-md border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary transition"
               value={formData.subject}
               onChange={handleChange}
