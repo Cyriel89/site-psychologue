@@ -18,7 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/about" className="block hover:underline">À propos</Link>
           <Link href="/admin/services" className="block hover:underline">Services</Link>
           <Link href="/admin/partners" className="block hover:underline">Partenaires</Link>
-          <Link href="/admin/location" className="block hover:underline">Lieu</Link>
+          <Link href="/admin/location" className="block hover:underline">Lieu & horaires</Link>
           <Link href="/admin/faq" className="block hover:underline">FAQ</Link>
           <Link href="/admin/contact" className="block hover:underline">Contact</Link>
           <Link href="/admin/media" className="block hover:underline">Média</Link>

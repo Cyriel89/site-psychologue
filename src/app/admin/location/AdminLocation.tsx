@@ -2,89 +2,117 @@
 
 import { useState } from "react";
 
-type LocationRow = {
+type OpeningHours = {
+  Lundi: string;
+  Mardi: string;
+  Mercredi: string;
+  Jeudi: string;
+  Vendredi: string;
+  Samedi: string;
+  Dimanche: string;
+};
+
+type LocationForm = {
   id: string;
   title: string;
-  subtitle: string | null;
+  subtitle: string;
   addressLine1: string;
-  addressLine2: string | null;
-  city: string;
+  addressLine2: string;
   postalCode: string;
+  city: string;
   country: string;
   latitude: number;
   longitude: number;
-  mapUrl: string | null;
-  notes: string | null;
+  mapUrl: string;
+  notes: string;
+  openingHours: OpeningHours;
 };
 
-export default function AdminLocation({ initial }: { initial: LocationRow }) {
-  const [form, setForm] = useState<LocationRow>(initial);
+export default function AdminLocation({ initial }: { initial: LocationForm }) {
+  const [form, setForm] = useState<LocationForm>(initial);
   const [status, setStatus] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [err, setErr] = useState("");
 
   const update = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    if (name === "latitude" || name === "longitude") {
-      setForm((p) => ({ ...p, [name]: Number(value) }));
-    } else {
-      setForm((p) => ({ ...p, [name]: value }));
+    if (name in form) {
+      setForm((p) => ({ ...p, [name]: name === "latitude" || name === "longitude" ? Number(value) : value }));
     }
+  };
+
+  const updateHours = (day: keyof OpeningHours, value: string) => {
+    setForm((p) => ({ ...p, openingHours: { ...p.openingHours, [day]: value } }));
   };
 
   const onSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("saving");
     setErr("");
+    
+    // Conversion objet → tableau pour la BDD
+    const openingHoursArray = Object.entries(form.openingHours).map(([day, hours]) => ({
+      day,
+      hours
+    }));
+    
+    const payload = { ...form, openingHours: openingHoursArray };
+    
     try {
       const res = await fetch("/api/admin/location/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        credentials: "include",
+        body: JSON.stringify(payload),
       });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok || !payload.ok) {
-        setErr(payload.message || "Erreur de sauvegarde.");
+      const responseData = await res.json().catch(() => ({}));
+      if (!res.ok || !responseData.ok) {
         setStatus("error");
+        setErr(responseData.message || "Erreur de sauvegarde.");
         return;
       }
       setStatus("ok");
     } catch {
-      setErr("Erreur réseau.");
       setStatus("error");
+      setErr("Erreur réseau.");
     }
   };
 
   return (
-    <main className="max-w-3xl mx-auto bg-white rounded-lg border p-6">
-      <h1 className="text-xl font-semibold mb-4">Lieu — Administration</h1>
-      <form onSubmit={onSave} className="space-y-4">
-        <div>
-          <label className="block text-sm mb-1">Titre</label>
-          <input name="title" value={form.title} onChange={update} className="w-full border rounded p-2" />
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Sous-titre</label>
-          <input name="subtitle" value={form.subtitle ?? ""} onChange={update} className="w-full border rounded p-2" />
+    <main className="max-w-4xl mx-auto bg-white rounded-lg border p-6">
+      <h1 className="text-xl font-semibold mb-4">Lieu & horaires — Administration</h1>
+
+      <form onSubmit={onSave} className="space-y-6">
+        {/* En-tête */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm mb-1">Titre</label>
+            <input name="title" value={form.title} onChange={update} className="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Sous-titre</label>
+            <input name="subtitle" value={form.subtitle} onChange={update} className="w-full border rounded p-2" />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Adresse */}
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm mb-1">Adresse (ligne 1)</label>
+            <label className="block text-sm mb-1">Adresse ligne 1</label>
             <input name="addressLine1" value={form.addressLine1} onChange={update} className="w-full border rounded p-2" />
           </div>
           <div>
-            <label className="block text-sm mb-1">Adresse (ligne 2)</label>
-            <input name="addressLine2" value={form.addressLine2 ?? ""} onChange={update} className="w-full border rounded p-2" />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Ville</label>
-            <input name="city" value={form.city} onChange={update} className="w-full border rounded p-2" />
+            <label className="block text-sm mb-1">Adresse ligne 2</label>
+            <input name="addressLine2" value={form.addressLine2} onChange={update} className="w-full border rounded p-2" />
           </div>
           <div>
             <label className="block text-sm mb-1">Code postal</label>
             <input name="postalCode" value={form.postalCode} onChange={update} className="w-full border rounded p-2" />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Ville</label>
+            <input name="city" value={form.city} onChange={update} className="w-full border rounded p-2" />
           </div>
           <div>
             <label className="block text-sm mb-1">Pays</label>
@@ -92,33 +120,68 @@ export default function AdminLocation({ initial }: { initial: LocationRow }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Coordonnées / Map */}
+        <div className="grid md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm mb-1">Latitude</label>
-            <input name="latitude" type="string" value={form.latitude} onChange={update} className="w-full border rounded p-2" />
+            <input name="latitude" type="number" step="any" value={form.latitude} onChange={update} className="w-full border rounded p-2" />
           </div>
           <div>
             <label className="block text-sm mb-1">Longitude</label>
-            <input name="longitude" type="string" value={form.longitude} onChange={update} className="w-full border rounded p-2" />
+            <input name="longitude" type="number" step="any" value={form.longitude} onChange={update} className="w-full border rounded p-2" />
           </div>
           <div>
-            <label className="block text-sm mb-1">Lien Google Maps</label>
-            <input name="mapUrl" value={form.mapUrl ?? ""} onChange={update} className="w-full border rounded p-2" />
+            <label className="block text-sm mb-1">Lien carte (Google / OSM)</label>
+            <input name="mapUrl" value={form.mapUrl} onChange={update} className="w-full border rounded p-2" />
           </div>
         </div>
 
+        {/* Notes */}
         <div>
-          <label className="block text-sm mb-1">Notes</label>
-          <textarea name="notes" value={form.notes ?? ""} onChange={update} rows={3} className="w-full border rounded p-2" />
+          <label className="block text-sm mb-1">Notes (optionnel)</label>
+          <textarea name="notes" rows={3} value={form.notes} onChange={update} className="w-full border rounded p-2" />
         </div>
 
-        <div className="flex items-center gap-3">
-          <button type="submit" className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60" disabled={status === "saving"}>
+        {/* Horaires d'ouverture */}
+        <h2 className="font-medium">Horaires d'ouverture</h2>
+        <div className="border rounded-lg">
+          <div className="grid md:grid-cols-2 gap-4 p-4">
+            {(
+              [
+                "Lundi",
+                "Mardi",
+                "Mercredi",
+                "Jeudi",
+                "Vendredi",
+                "Samedi",
+                "Dimanche",
+              ] as Array<keyof OpeningHours>
+            ).map((day) => (
+              <div key={day}>
+                <label className="block text-sm mb-1">{day}</label>
+                <input
+                  value={form.openingHours[day] ?? ""}
+                  onChange={(e) => updateHours(day, e.target.value)}
+                  placeholder="ex : 9h - 19h ou Fermé"
+                  className="w-full border rounded p-2"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-3 justify-end">
+          <button
+            type="submit"
+            className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
+            disabled={status === "saving"}
+          >
             {status === "saving" ? "Enregistrement..." : "Enregistrer"}
           </button>
-          {status === "ok" && <span className="text-green-600">Sauvegardé ✅</span>}
-          {status === "error" && <span className="text-red-600">{err}</span>}
         </div>
+
+        {status === "ok" && <div className="text-green-600">Sauvegardé ✅</div>}
+        {status === "error" && <div className="text-red-600">{err}</div>}
       </form>
     </main>
   );

@@ -51,6 +51,11 @@ export default function AdminContact({ initial }: { initial: ContactAdminEditabl
       <h1 className="text-xl font-semibold mb-4">Contact — Administration</h1>
 
       <form onSubmit={onSave} className="space-y-5">
+        <div>
+          <label className="block text-sm mb-1">Intro (au-dessus du formulaire)</label>
+          <textarea name="intro" rows={3} value={form.intro} onChange={update} className="w-full border rounded p-2" />
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm mb-1">Titre</label>
@@ -64,10 +69,6 @@ export default function AdminContact({ initial }: { initial: ContactAdminEditabl
             <label className="block text-sm mb-1">Téléphone</label>
             <input name="phone" value={form.phone} onChange={update} className="w-full border rounded p-2" />
           </div>
-          <div>
-            <label className="block text-sm mb-1">Lien prise de RDV</label>
-            <input name="booking" value={form.booking} onChange={update} className="w-full border rounded p-2" />
-          </div>
         </div>
 
         <div>
@@ -77,10 +78,6 @@ export default function AdminContact({ initial }: { initial: ContactAdminEditabl
         <div>
           <label className="block text-sm mb-1">Horaires d’ouverture</label>
           <input name="openingHours" value={form.openingHours} onChange={update} className="w-full border rounded p-2" />
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Intro (au-dessus du formulaire)</label>
-          <textarea name="intro" rows={3} value={form.intro} onChange={update} className="w-full border rounded p-2" />
         </div>
 
         <div className="flex gap-3 justify-end">

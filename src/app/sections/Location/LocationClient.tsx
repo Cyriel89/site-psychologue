@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export default function Location({ location }: { location: LocationData }) {
+  console.log("Location data:", location);
   return (
     <section className="min-h-screen w-full px-4 py-16 bg-secondary flex items-center justify-center">
       <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
