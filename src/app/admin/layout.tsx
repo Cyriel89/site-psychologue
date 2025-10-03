@@ -21,12 +21,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/location" className="block hover:underline">Lieu</Link>
           <Link href="/admin/faq" className="block hover:underline">FAQ</Link>
           <Link href="/admin/contact" className="block hover:underline">Contact</Link>
+          <Link href="/admin/media" className="block hover:underline">Média</Link>
         </nav>
         <form action="/api/auth/logout" method="post" className="mt-6">
           <button className="w-full text-left text-sm bg-gray-800 px-3 py-2 rounded hover:bg-gray-700">
             Se déconnecter
           </button>
         </form>
+        <nav className="space-y-2 text-sm">
+          <Link href="/" className="block hover:underline">Voir le site</Link>
+        </nav>
       </aside>
       <main className="p-6 bg-gray-50">{children}</main>
     </div>
