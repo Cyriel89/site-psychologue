@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+
     let {
       id,
       title,
@@ -33,10 +34,10 @@ export async function POST(req: NextRequest) {
       priceCurrency,     // string | null
       imageId,           // string | null
       visible,           // boolean
-      order,             // number
+      // ❌ on n'accepte plus 'order' depuis le client
     } = body;
 
-    // --- validations minimales ---
+    // Validations minimales
     if (!title?.trim()) return err("Titre requis");
     if (!slug?.trim()) return err("Slug requis");
     if (audience !== "INDIVIDUAL" && audience !== "COMPANY") {
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
       return err("Type de prix invalide (FIXED | QUOTE)");
     }
 
-    // --- Prix (string) ---
+    // Prix (string)
     if (priceType === "FIXED") {
       if (typeof priceAmount !== "string" || priceAmount.trim() === "") {
         return err("Montant requis pour un prix fixe");
@@ -66,54 +67,55 @@ export async function POST(req: NextRequest) {
 
     imageId = imageId || null;
 
-    // Récupérer l'ancien service si update
-    const prev = id ? await prisma.service.findUnique({ where: { id } }) : null;
-
-    // Si création → calculer order = fin de l’audience
-    if (!id) {
-      const max = await prisma.service.aggregate({
+    // ⚠️ On ne touche pas à l’ordre en update
+    // ⚠️ En create, on calcule le prochain ordre pour l’audience
+    if (id) {
+      const saved = await prisma.service.update({
+        where: { id },
+        data: {
+          title: title.trim(),
+          slug: slug.trim(),
+          iconKey: iconKey || null,
+          audience,
+          shortDescription: shortDescription.trim(),
+          longDescription: longDescription.trim(),
+          priceType,
+          priceAmount,
+          priceCurrency,
+          imageId,
+          visible: !!visible,
+          // ❌ ne pas écrire 'order' ici
+        },
+        include: { image: true },
+      });
+      return NextResponse.json({ ok: true, service: saved });
+    } else {
+      // calcule le prochain 'order' (= max + 1) pour cette audience
+      const agg = await prisma.service.aggregate({
         where: { audience },
         _max: { order: true },
       });
-      order = typeof order === "number" ? order : (max._max.order ?? -1) + 1;
-    }
+      const nextOrder = (agg._max.order ?? -1) + 1;
 
-    // Si update ET audience change → mettre à la fin de la nouvelle audience
-    if (id && prev && prev.audience !== audience) {
-      const max = await prisma.service.aggregate({
-        where: { audience },
-        _max: { order: true },
+      const created = await prisma.service.create({
+        data: {
+          title: title.trim(),
+          slug: slug.trim(),
+          iconKey: iconKey || null,
+          audience,
+          shortDescription: shortDescription.trim(),
+          longDescription: longDescription.trim(),
+          priceType,
+          priceAmount,
+          priceCurrency,
+          imageId,
+          visible: !!visible,
+          order: nextOrder, // ✅ unique par audience
+        },
+        include: { image: true },
       });
-      order = (max._max.order ?? -1) + 1;
+      return NextResponse.json({ ok: true, service: created });
     }
-
-    const data: any = {
-      title: title.trim(),
-      slug: slug.trim(),
-      iconKey: iconKey || null,
-      audience,
-      shortDescription: shortDescription.trim(),
-      longDescription: longDescription.trim(),
-      priceType,
-      priceAmount,
-      priceCurrency,
-      imageId,
-      visible: !!visible,
-      order: Number.isFinite(order) ? Number(order) : 0,
-    };
-
-    const saved = id
-      ? await prisma.service.update({
-          where: { id },
-          data,
-          include: { image: true },
-        })
-      : await prisma.service.create({
-          data,
-          include: { image: true },
-        });
-
-    return NextResponse.json({ ok: true, service: saved });
   } catch (e) {
     console.error("POST /api/admin/services/save error", e);
     return NextResponse.json({ ok: false, message: toErrorMessage(e) }, { status: 500 });
