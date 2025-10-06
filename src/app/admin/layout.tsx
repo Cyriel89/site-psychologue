@@ -22,6 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/faq" className="block hover:underline">FAQ</Link>
           <Link href="/admin/contact" className="block hover:underline">Contact</Link>
           <Link href="/admin/media" className="block hover:underline">Média</Link>
+          <Link href="/admin/legal-pages" className="block hover:underline">Pages légales</Link>
         </nav>
         <form action="/api/auth/logout" method="post" className="mt-6">
           <button className="w-full text-left text-sm bg-gray-800 px-3 py-2 rounded hover:bg-gray-700">
