@@ -9,8 +9,8 @@ export default async function LegalNotice() {
   });
 
   return (
-    <main className="container mx-auto max-w-3xl py-12">
-      <h1 className="text-3xl font-semibold mb-6">{ page?.title || "Mentions légales" }</h1>
+    <main className="min-h-screen max-w-3xl mx-auto px-4 py-16">
+      <h1 className="text-3xl font-bold mb-6">{ page?.title || "Mentions légales" }</h1>
       {!page ? (
         <p>Cette page n’est pas encore disponible.</p>
       ) : (
