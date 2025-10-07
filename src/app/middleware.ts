@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@/lib/session";
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (!pathname.startsWith("/admin")) return NextResponse.next();
+  if (!pathname.startsWith("/admin") || !pathname.startsWith("/api/admin")) return NextResponse.next();
 
   // Pas de cookie => on renvoie à l'accueil (ne révèle pas l’existence de /admin)
   const hasCookie = req.cookies.has(COOKIE_NAME);
@@ -19,5 +19,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

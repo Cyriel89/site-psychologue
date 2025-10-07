@@ -20,7 +20,7 @@ export default async function AdminPagesList() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Link className="btn btn-secondary" href={`/admin/pages/${p.id}/edit`}>Éditer</Link>
+              <Link className="btn btn-secondary" href={`/admin/legal-pages/${p.id}/edit`}>Éditer</Link>
               {p.slug === PageSlug.MENTIONS_LEGALES && (
                 <Link className="btn" href="/mentions-legales" target="_blank">Voir</Link>
               )}

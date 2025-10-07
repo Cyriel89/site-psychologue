@@ -1,14 +1,13 @@
 import { prisma }from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { assertAdminOrSupport } from "@/lib/admin-guard";
+import { requireAdminOrSupport } from "@/lib/authServer";
 import { revalidateTag } from "next/cache";
 import { PAGE_TAG } from "@/lib/cache-tags";
 import { PageSlug } from "@prisma/client";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const guard = await assertAdminOrSupport(req);
-  if (guard) return guard;
-
+export async function GET(_: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdminOrSupport();
+  if (!auth.ok) return auth.response;
   const revisions = await prisma.pageRevision.findMany({
     where: { pageId: params.id },
     orderBy: { createdAt: "desc" },
@@ -17,11 +16,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ ok: true, data: revisions });
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const guard = await assertAdminOrSupport(req);
-  if (guard) return guard;
+export async function POST(_: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdminOrSupport();
+  if (!auth.ok) return auth.response;
 
-  const { revisionId } = await req.json().catch(() => ({} as any));
+  const { revisionId } = await _.json().catch(() => ({} as any));
   if (!revisionId) return NextResponse.json({ ok: false, error: "revisionId required" }, { status: 400 });
 
   const rev = await prisma.pageRevision.findUnique({ where: { id: revisionId } });

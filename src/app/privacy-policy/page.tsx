@@ -8,7 +8,7 @@ export default async function PrivacyPolicy() {
   });
 
   return (
-    <main className="min-h-screen max-w-3xl mx-auto px-4 py-16">
+    <main className="min-h-screen max-w-3xl mx-auto px-4 py-20">
       <h1 className="text-3xl font-bold mb-6">{ page?.title || "Politique de confidentialité" }</h1>
       {!page ? (
         <p>Cette page n’est pas encore disponible.</p>

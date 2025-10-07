@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { assertAdminOrSupport } from "@/lib/admin-guard";
+import { requireAdminOrSupport } from "@/lib/authServer";
 import { revalidateTag } from "next/cache";
 import { PAGE_TAG } from "@/lib/cache-tags";
 import { PageStatus, PageSlug } from "@prisma/client";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const guard = await assertAdminOrSupport(req);
-  if (guard) return guard;
+export async function POST(_: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdminOrSupport();
+    if (!auth.ok) return auth.response;
 
   const page = await prisma.page.findUnique({ where: { id: params.id } });
   if (!page) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });

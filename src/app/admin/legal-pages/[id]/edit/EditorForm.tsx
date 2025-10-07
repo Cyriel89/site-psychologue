@@ -26,20 +26,22 @@ export default function EditorForm({ initialPage, revisions }: { initialPage: Pa
   async function saveDraft() {
     setMsg(null);
     startTransition(async () => {
-      const res = await fetch(`/api/admin/pages/${page.id}`, {
+      const res = await fetch(`/api/admin/legal-pages/${page.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ title: page.title, content: page.content, status: "DRAFT" }),
       });
       const j = await res.json();
       setMsg(j.ok ? "Brouillon enregistré." : j.error || "Erreur");
+      console.log(j);
     });
   }
 
   async function publish() {
     setMsg(null);
     startTransition(async () => {
-      const res = await fetch(`/api/admin/pages/${page.id}/publish`, { method: "POST" });
+      const res = await fetch(`/api/admin/legal-pages/${page.id}/publish`, { method: "POST" });
       const j = await res.json();
       setMsg(j.ok ? "Publié !" : j.error || "Erreur");
     });
@@ -48,7 +50,7 @@ export default function EditorForm({ initialPage, revisions }: { initialPage: Pa
   async function unpublish() {
     setMsg(null);
     startTransition(async () => {
-      const res = await fetch(`/api/admin/pages/${page.id}/unpublish`, { method: "POST" });
+      const res = await fetch(`/api/admin/legal-pages/${page.id}/unpublish`, { method: "POST" });
       const j = await res.json();
       setMsg(j.ok ? "Dépublié." : j.error || "Erreur");
     });
@@ -57,7 +59,7 @@ export default function EditorForm({ initialPage, revisions }: { initialPage: Pa
   async function restore(revId: string) {
     setMsg(null);
     startTransition(async () => {
-      const res = await fetch(`/api/admin/pages/${page.id}/revisions`, {
+      const res = await fetch(`/api/admin/legal-pages/${page.id}/revisions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ revisionId: revId }),

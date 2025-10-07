@@ -5,8 +5,8 @@ import { COOKIE_NAME, parseSessionFromToken } from "@/lib/session"; // ← ta fo
 export async function assertAdminOrSupport(req: NextRequest) {
   const token = req.cookies.get(COOKIE_NAME)?.value;
   const session = await parseSessionFromToken(token);
-  if (!session?.user || !["admin", "support"].includes(session.user.role)) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+  if (!session?.user || !["ADMIN", "SUPPORT"].includes(session.user.role)) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 403 });
   }
   return null; // ok
 }
