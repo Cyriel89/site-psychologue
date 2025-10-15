@@ -1,4 +1,4 @@
-# 🌿 Site Psychologue – Pauline Diné
+# 🌿 Site Psychologue
 
 Un site professionnel personnalisé développé sur mesure pour une psychologue du travail, avec un back-office sécurisé, une gestion complète des contenus et une architecture moderne.
 
