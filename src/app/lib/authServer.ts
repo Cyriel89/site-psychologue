@@ -1,48 +1,31 @@
-// lib/authServer.ts
+import "server-only";
 import { cookies } from "next/headers";
-import { parseSessionFromToken, COOKIE_NAME } from "@/lib/session";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { COOKIE_NAME, parseSessionFromToken } from "@/lib/session";
 
 export async function requireAdminOrSupport() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value ?? null;
-  const session = parseSessionFromToken(token);
+  const token = cookieStore.get(COOKIE_NAME)?.value;
 
-  if (!session) {
-    return {
-      ok: false as const,
-      response: NextResponse.json(
-        { ok: false, error: "unauthorized", hasToken: !!token, reason: "invalid_or_expired_token" },
-        { status: 403 }
-      ),
-    };
+  if (!token) {
+    redirect("/login");
+  }
+
+  const session = await parseSessionFromToken(token);
+
+  if (!session || !session.userId) {
+    redirect("/login");
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: session.userId },
+    where: { id: session.userId as string },
     select: { id: true, firstName: true, email: true, role: true },
   });
 
-  if (!user) {
-    return {
-      ok: false as const,
-      response: NextResponse.json(
-        { ok: false, error: "unauthorized", hasToken: !!token, reason: "user_not_found" },
-        { status: 403 }
-      ),
-    };
+  if (!user || (user.role !== "ADMIN" && user.role !== "SUPPORT")) {
+    redirect("/account");
   }
 
-  if (user.role !== "ADMIN" && user.role !== "SUPPORT") {
-    return {
-      ok: false as const,
-      response: NextResponse.json(
-        { ok: false, error: "forbidden", hasToken: !!token, reason: "insufficient_role", role: user.role },
-        { status: 403 }
-      ),
-    };
-  }
-
-  return { ok: true as const, user };
+  return user;
 }

@@ -5,7 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import DynamicIcon from "@/components/DynamicIcon";
 
-export default function Header() {
+interface HeaderProps {
+  userRole?: string;
+}
+
+export default function Header({ userRole }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -30,6 +34,14 @@ export default function Header() {
     { name: "Contact", href: "contact" },
     { name: "FAQ", href: "faq" },
   ];
+
+  const isLoggedIn = !!userRole;
+  const dashboardHref = (userRole === "ADMIN" || userRole === "SUPPORT") 
+    ? "/admin" 
+    : "/account";
+  const isHidden = pathname.startsWith("/admin") || pathname.startsWith("/account");
+  
+  if (isHidden) return null;
 
   return (
     <header
@@ -62,18 +74,30 @@ export default function Header() {
 
         {/* BOUTONS ACTIONS (Desktop) */}
         <div className="hidden lg:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
-          >
-            Espace Patient
-          </Link>
-          <Link
-            href="/register"
-            className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
-          >
-            S'inscrire
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href={dashboardHref}
+              className="flex items-center gap-2 px-5 py-2 text-sm font-medium bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+            >
+              <DynamicIcon name="layout-dashboard" className="w-4 h-4" />
+              Mon Espace
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+              >
+                Espace Patient
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+              >
+                S'inscrire
+              </Link>
+            </>
+          )}
         </div>
 
         {/* BOUTON MENU MOBILE */}
@@ -85,7 +109,7 @@ export default function Header() {
         </button>
       </div>
 
-      {/* MENU MOBILE (Slide-over) */}
+      {/* MENU MOBILE */}
       {isOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl p-4 flex flex-col gap-4">
           {navLinks.map((link) => (
@@ -99,22 +123,36 @@ export default function Header() {
             </Link>
           ))}
           <hr className="border-gray-100 my-2" />
-          <Link
-            href="/login"
-            onClick={closeMenu}
-            className="flex items-center justify-center gap-2 w-full py-3 text-gray-700 font-medium bg-gray-50 rounded-lg"
-          >
-            <DynamicIcon name="user" className="w-4 h-4" />
-            Espace Patient
-          </Link>
-          <Link
-            href="/register"
-            onClick={closeMenu}
-            className="flex items-center justify-center gap-2 w-full py-3 text-white font-medium bg-indigo-600 rounded-lg"
-          >
-            <DynamicIcon name="user-plus" className="w-4 h-4" />
-            S'inscrire
-          </Link>
+          
+          {isLoggedIn ? (
+             <Link
+             href="/compte"
+             onClick={closeMenu}
+             className="flex items-center justify-center gap-2 w-full py-3 text-white font-medium bg-indigo-600 rounded-lg"
+           >
+             <DynamicIcon name="layout-dashboard" className="w-4 h-4" />
+             Mon Espace
+           </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={closeMenu}
+                className="flex items-center justify-center gap-2 w-full py-3 text-gray-700 font-medium bg-gray-50 rounded-lg"
+              >
+                <DynamicIcon name="user" className="w-4 h-4" />
+                Espace Patient
+              </Link>
+              <Link
+                href="/register"
+                onClick={closeMenu}
+                className="flex items-center justify-center gap-2 w-full py-3 text-white font-medium bg-indigo-600 rounded-lg"
+              >
+                <DynamicIcon name="user-plus" className="w-4 h-4" />
+                S'inscrire
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>

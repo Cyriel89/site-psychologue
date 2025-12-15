@@ -55,7 +55,6 @@ export default function RegisterPage() {
 
       if (!res.ok) throw new Error(data.error || "Erreur lors de l'inscription");
 
-      // Succès -> Redirection directe vers le dashboard
       router.push("/account");
       router.refresh();
 
