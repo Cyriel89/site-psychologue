@@ -1,41 +1,66 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { verifyPassword } from "@/lib/crypto";
-import { buildSessionToken, COOKIE_NAME } from "@/lib/session";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma"; 
+import bcrypt from "bcryptjs";
+import { buildSessionToken } from "@/lib/session";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const { email, password } = body;
 
+    // Validation basique
     if (!email || !password) {
-      return NextResponse.json({ message: "L'e-mail ou le mot de passe est manquant" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Email et mot de passe requis" },
+        { status: 400 }
+      );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.passwordHash) {
-      return NextResponse.json({ message: "Identifiants invalides" }, { status: 401 });
-    }
-    const ok = await verifyPassword(password, user.passwordHash);
-    if (!ok) {
-      return NextResponse.json({ message: "Identifiants invalides" }, { status: 401 });
-    }
-    if (!user.isActive) {
-      return NextResponse.json({ message: "Compte désactivé" }, { status: 403 });
-    }
-
-    const { token, maxAge } = buildSessionToken({ userId: user.id, role: user.role });
-
-    const res = NextResponse.json({ message: "OK" });
-    res.cookies.set(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge,
+    const user = await prisma.user.findUnique({
+      where: { email },
     });
-    res.headers.set("Cache-Control", "no-store");
-    return res;
-  } catch {
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+
+    if (!user) {
+      return NextResponse.json(
+        { ok: false, error: "Identifiants invalides" },
+        { status: 401 }
+      );
+    }
+
+    if (!user.isActive) {
+      return NextResponse.json(
+        { ok: false, error: "Ce compte a été désactivé." },
+        { status: 403 }
+      );
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { ok: false, error: "Identifiants invalides" },
+        { status: 401 }
+      );
+    }
+
+    const payload = {
+      userId: user.id,
+      role: user.role, 
+    };
+
+    await buildSessionToken(payload);
+
+    return NextResponse.json({
+      ok: true,
+      role: user.role, // "ADMIN" ou "CLIENT"
+      message: "Connexion réussie",
+    });
+
+  } catch (error) {
+    console.error("Erreur login:", error);
+    return NextResponse.json(
+      { ok: false, error: "Erreur serveur interne" },
+      { status: 500 }
+    );
   }
 }
