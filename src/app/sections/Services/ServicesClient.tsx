@@ -25,7 +25,7 @@ export default function Services({
   const handleClose = () => setSelectedKey(null);
 
   const renderGrid = (items: ServiceData[]) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    <div id="services"className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
       {items.map((service, index) => {
         return (
           <motion.button

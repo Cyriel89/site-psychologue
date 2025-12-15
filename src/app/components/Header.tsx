@@ -1,127 +1,122 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-
-const navLinks = [
-  { label: "Accueil", href: "#hero" },
-  { label: "À propos", href: "#about" },
-  { label: "Services", href: "#services" },
-  { label: "Partenaires", href: "#partners" },
-  { label: "Lieu", href: "#location" },
-  { label: "Contact", href: "#contact" },
-  { label: "FAQ", href: "#faq" },
-];
+import DynamicIcon from "@/components/DynamicIcon";
 
 export default function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
-
-  // ✅ TOUS les hooks sont appelés, quelle que soit la route
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const updateScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.body.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      setScrollProgress(progress);
-      setIsScrolled(scrollTop > 30);
-      if (menuOpen) setMenuOpen(false);
-    };
-    window.addEventListener("scroll", updateScroll);
-    return () => window.removeEventListener("scroll", updateScroll);
-  }, [menuOpen]);
-
-  useEffect(() => {
-    document.documentElement.style.scrollBehavior = "smooth";
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ✅ On peut retourner null APRÈS avoir appelé les hooks
-  if (isAdmin) return null;
+  const closeMenu = () => setIsOpen(false);
+
+  const getHref = (anchor: string) => {
+    if (pathname === "/") return `#${anchor}`;
+    return `/#${anchor}`;
+  };
+
+  const navLinks = [
+    { name: "À propos", href: "about" },
+    { name: "Services", href: "services" },
+    { name: "Lieu", href: "location" },
+    { name: "Contact", href: "contact" },
+    { name: "FAQ", href: "faq" },
+  ];
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50">
-      {/* Scroll bar avec fond opaque pour éviter toute transparence */}
-      <div className="bg-white">
-        <div
-          className="h-1 bg-blue-600 transition-all duration-150"
-          style={{ width: `${scrollProgress}%` }}
-        />
-      </div>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+      }`}
+    >
+      <div className="container mx-auto px-4 flex items-center justify-between">
+        
+        {/* LOGO */}
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-indigo-900">
+          <div className="bg-indigo-600 text-white p-1.5 rounded-lg">
+            <DynamicIcon name="brain-circuit" className="w-6 h-6" />
+          </div>
+          <span>Pauline Diné</span>
+        </Link>
 
-      {/* Nav */}
-      <nav
-        className={`bg-white transition-all duration-300 ${
-          isScrolled ? "shadow-md py-3" : "py-5"
-        }`}
-        aria-label="Navigation principale"
-      >
-        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          {/* Logo */}
+        {/* NAVIGATION DESKTOP */}
+        <nav className="hidden lg:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={getHref(link.href)}
+              className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* BOUTONS ACTIONS (Desktop) */}
+        <div className="hidden lg:flex items-center gap-3">
           <Link
-            href="#hero"
-            className="text-xl font-bold text-gray-800 hover:text-blue-600 transition"
+            href="/login"
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 transition-colors"
           >
-            Pauline Diné
+            Espace Patient
           </Link>
-
-          {/* Desktop nav */}
-          <ul className="hidden md:flex space-x-6">
-            {navLinks.map((link, index) => (
-              <li key={index}>
-                <a
-                  href={link.href}
-                  className="relative text-gray-700 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full hover:text-blue-600"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          {/* Mobile burger */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden text-gray-700"
-            aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          <Link
+            href="/register"
+            className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
           >
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+            S'inscrire
+          </Link>
         </div>
 
-        {/* Mobile dropdown */}
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden bg-white px-4 pb-6"
+        {/* BOUTON MENU MOBILE */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="lg:hidden p-2 text-gray-600 hover:text-indigo-600"
+        >
+          <DynamicIcon name={isOpen ? "x" : "menu"} className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* MENU MOBILE (Slide-over) */}
+      {isOpen && (
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl p-4 flex flex-col gap-4">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={getHref(link.href)}
+              onClick={closeMenu}
+              className="block py-2 text-gray-600 hover:text-indigo-600 font-medium"
             >
-              <ul className="flex flex-col space-y-4 mt-4">
-                {navLinks.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href={link.href}
-                      className="text-gray-800 hover:text-blue-600 text-base font-medium"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+              {link.name}
+            </Link>
+          ))}
+          <hr className="border-gray-100 my-2" />
+          <Link
+            href="/login"
+            onClick={closeMenu}
+            className="flex items-center justify-center gap-2 w-full py-3 text-gray-700 font-medium bg-gray-50 rounded-lg"
+          >
+            <DynamicIcon name="user" className="w-4 h-4" />
+            Espace Patient
+          </Link>
+          <Link
+            href="/register"
+            onClick={closeMenu}
+            className="flex items-center justify-center gap-2 w-full py-3 text-white font-medium bg-indigo-600 rounded-lg"
+          >
+            <DynamicIcon name="user-plus" className="w-4 h-4" />
+            S'inscrire
+          </Link>
+        </div>
+      )}
     </header>
   );
 }
