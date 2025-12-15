@@ -1,27 +1,22 @@
-// src/app/admin/hero/page.tsx
 import { prisma } from "@/lib/prisma";
 import { requireAdminOrSupport } from "@/lib/authServer";
 import HeroForm from "./HeroForm";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default async function AdminHeroPage() {
-  const user = await requireAdminOrSupport();
-  if (!user) return null; // layout redirige déjà si pas d’accès
+  await requireAdminOrSupport();
 
   const setting = await prisma.setting.findUnique({
     where: { id: "global" },
-    include: { heroImage: true },
   });
 
   const heroJson = (setting?.hero as any) ?? {};
+
   const media = await prisma.media.findMany({
     orderBy: { createdAt: "desc" },
     select: { id: true, url: true, alt: true },
   });
 
-  const initial = {
+  const initialData = {
     name: heroJson.name ?? "",
     title: heroJson.title ?? "",
     subtitle: heroJson.subtitle ?? "",
@@ -31,9 +26,15 @@ export default async function AdminHeroPage() {
   };
 
   return (
-    <div>
-      <h1 className="text-xl font-semibold mb-6">Éditer la section Hero</h1>
-      <HeroForm initial={initial} media={media} />
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Section Hero (Accueil)</h1>
+        <p className="text-gray-500 mt-1">
+          Personnalisez la grande bannière visible tout en haut de votre page d'accueil.
+        </p>
+      </div>
+
+      <HeroForm initial={initialData} media={media} />
     </div>
   );
 }

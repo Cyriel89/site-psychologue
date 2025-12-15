@@ -1,53 +1,32 @@
 import { prisma } from "@/lib/prisma";
-import AdminLocation from "./AdminLocation";
+import { requireAdminOrSupport } from "@/lib/authServer";
+import LocationForm from "./LocationForm";
+import { OpeningHoursData } from "./actions";
 
-export const dynamic = "force-dynamic";
-
-type OpeningHours = {
-  Lundi: string;
-  Mardi: string;
-  Mercredi: string;
-  Jeudi: string;
-  Vendredi: string;
-  Samedi: string;
-  Dimanche: string;
-};
-
-type RawOpeningHour = { day: string; hours: string };
-
-function normalizeOpeningHours(json: unknown): OpeningHours {
-  const defaultHours: OpeningHours = {
-    Lundi: "",
-    Mardi: "",
-    Mercredi: "",
-    Jeudi: "",
-    Vendredi: "",
-    Samedi: "",
-    Dimanche: "",
+function normalizeOpeningHours(json: unknown): OpeningHoursData {
+  const defaultHours: OpeningHoursData = {
+    Lundi: "", Mardi: "", Mercredi: "", Jeudi: "", Vendredi: "", Samedi: "", Dimanche: ""
   };
 
-  if (!Array.isArray(json)) {
-    return defaultHours;
-  }
- 
-  const rawHours = json as RawOpeningHour[];
-  const mappedHours: Partial<OpeningHours> = {};
+  if (!Array.isArray(json)) return defaultHours;
 
-  rawHours.forEach(item => {
-    const day = item.day as keyof OpeningHours;
-    if (day && typeof item.hours === 'string') {
-      mappedHours[day] = item.hours;
+  const result = { ...defaultHours };
+  json.forEach((item: any) => {
+    if (item.day && item.hours && item.day in result) {
+      // @ts-ignore
+      result[item.day] = item.hours;
     }
   });
 
-  return { ...defaultHours, ...mappedHours };
+  return result;
 }
 
 export default async function AdminLocationPage() {
+  await requireAdminOrSupport();
+
   const loc = await prisma.location.findUnique({ where: { id: "primary" } });
 
   const initial = {
-    id: loc?.id ?? "primary",
     title: loc?.title ?? "Où me trouver ?",
     subtitle: loc?.subtitle ?? "",
     addressLine1: loc?.addressLine1 ?? "",
@@ -55,12 +34,23 @@ export default async function AdminLocationPage() {
     postalCode: loc?.postalCode ?? "",
     city: loc?.city ?? "",
     country: loc?.country ?? "France",
-    latitude: loc?.latitude ?? 47.2166,
-    longitude: loc?.longitude ?? -1.55133,
+    latitude: loc?.latitude?.toString() ?? "47.218",
+    longitude: loc?.longitude?.toString() ?? "-1.553",
     mapUrl: loc?.mapUrl ?? "",
     notes: loc?.notes ?? "",
     openingHours: normalizeOpeningHours(loc?.openingHours),
   };
 
-  return <AdminLocation initial={initial} />;
+  return (
+    <div className="max-w-5xl mx-auto pb-10">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Lieu & Horaires</h1>
+        <p className="text-gray-500 mt-1">
+          Ces informations apparaîtront dans le pied de page et sur la page Contact.
+        </p>
+      </div>
+
+      <LocationForm initial={initial} />
+    </div>
+  );
 }

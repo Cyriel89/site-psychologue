@@ -1,44 +1,32 @@
-// src/app/admin/about/page.tsx
 import { prisma } from "@/lib/prisma";
-import AdminAbout from "./AdminAbout";
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { COOKIE_NAME, parseSessionFromToken } from "@/lib/session";
-
-export const dynamic = "force-dynamic";
+import { requireAdminOrSupport } from "@/lib/authServer";
+import AboutForm from "./AboutForm";
 
 export default async function AdminAboutPage() {
-  const token = (await cookies()).get(COOKIE_NAME)?.value;
-  const session = parseSessionFromToken(token);
-  if (!session?.userId || !["ADMIN", "SUPPORT"].includes(session.role)) {
-    redirect("/admin/login");
-  }
+  await requireAdminOrSupport();
 
-  const setting = await prisma.setting.findUnique({
-    where: { id: "global" },
-  });
+  const setting = await prisma.setting.findUnique({ where: { id: "global" } });
+  
+  // Casting sécurisé du JSON
+  const aboutJson = (setting?.about as any) ?? {};
 
-  const media = await prisma.media.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  });
-
-  // Valeurs par défaut si vide
-  const about = (setting?.about as any) ?? {
-    title: "À propos",
-    presentation: "",
-    mission: "",
-    goal: "",
+  const initialData = {
+    title: aboutJson.title ?? "",
+    presentation: aboutJson.description.presentation ?? "",
+    mission: aboutJson.description.mission ?? "",
+    goal: aboutJson.description.goal ?? "",
   };
 
   return (
-    <AdminAbout
-      initialAbout={{
-        title: about.title ?? "À propos",
-        presentation: about.presentation ?? "",
-        mission: about.mission ?? "",
-        goal: about.goal ?? "",
-      }}
-    />
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">À Propos</h1>
+        <p className="text-gray-500 mt-1">
+          Gérez votre présentation et votre biographie.
+        </p>
+      </div>
+
+      <AboutForm initial={initialData} />
+    </div>
   );
 }

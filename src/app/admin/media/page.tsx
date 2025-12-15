@@ -1,30 +1,24 @@
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { COOKIE_NAME, parseSessionFromToken } from "@/lib/session";
-import { redirect } from "next/navigation";
-import AdminMedia from "./AdminMedia";
-
-export const dynamic = "force-dynamic";
+import { requireAdminOrSupport } from "@/lib/authServer";
+import MediaClient from "./MediaClient";
 
 export default async function AdminMediaPage() {
-  const token = (await cookies()).get(COOKIE_NAME)?.value;
-  const session = parseSessionFromToken(token);
-  if (!session?.userId || !["ADMIN", "SUPPORT"].includes(session.role)) {
-    redirect("/admin/login");
-  }
+  await requireAdminOrSupport();
 
-  const media = await prisma.media.findMany({
+  const medias = await prisma.media.findMany({
     orderBy: { createdAt: "desc" },
   });
 
   return (
-    <AdminMedia
-      initialMedia={media.map(m => ({
-        id: m.id,
-        url: m.url,
-        alt: m.alt ?? "",
-        createdAt: m.createdAt.toISOString(),
-      }))}
-    />
+    <div className="max-w-6xl mx-auto pb-10">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Médiathèque</h1>
+        <p className="text-gray-500 mt-1">
+          Gérez ici toutes les images de votre site. Les fichiers sont stockés localement sur le serveur.
+        </p>
+      </div>
+
+      <MediaClient initialMedia={medias} />
+    </div>
   );
 }

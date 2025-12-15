@@ -128,6 +128,8 @@ model Media {
   id        String   @id @default(cuid())
   url       String // local (/uploads/...) ou externe (S3)
   alt       String?
+  type      String   @default("IMAGE") 
+  mime      String?
   createdAt DateTime @default(now())
 
   // Back-relations (images principales)
@@ -165,7 +167,7 @@ model Service {
   title            String
   shortDescription String
   longDescription  String
-  iconKey          String // ex: "User", "HeartCrack"
+  iconKey          String? // ex: "User", "HeartCrack"
   audience         ServiceAudience
   priceType        PriceType
   priceAmount      String? // ex: "60€", "Sur devis"

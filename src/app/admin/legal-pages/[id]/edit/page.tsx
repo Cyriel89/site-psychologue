@@ -1,15 +1,36 @@
 import { prisma } from "@/lib/prisma";
-import EditorForm from "./EditorForm";
+import { requireAdminOrSupport } from "@/lib/authServer";
+import LegalPageForm from "./LegalPageForm";
+import { redirect } from "next/navigation";
 
-export default async function EditPage({ params }: { params: { id: string } }) {
-  const page = await prisma.page.findUnique({ where: { id: params.id } });
-  if (!page) return <div>Page introuvable.</div>;
+export default async function EditPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminOrSupport();
+
+  const { id } = await params;
+
+  const page = await prisma.page.findUnique({ where: { id } });
+  if (!page) {
+     redirect("/admin/legal-pages");
+  }
 
   const revisions = await prisma.pageRevision.findMany({
     where: { pageId: page.id },
     orderBy: { createdAt: "desc" },
-    take: 20,
+    take: 10,
+    select: { id: true, createdAt: true, status: true }
   });
 
-  return <EditorForm initialPage={page} revisions={revisions} />;
+  return (
+     <div className="max-w-6xl mx-auto pb-10">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <span className="text-gray-400 font-normal">Édition /</span> 
+            {page.title}
+        </h1>
+        
+        <LegalPageForm 
+            initialPage={page} 
+            revisions={revisions.map(r => ({ ...r, status: r.status || "DRAFT" }))} 
+        />
+     </div>
+  );
 }
