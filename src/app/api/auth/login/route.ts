@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; 
 import bcrypt from "bcryptjs";
-import { buildSessionToken } from "@/lib/session";
+import { createSession } from "@/lib/session";
 
 export async function POST(req: Request) {
   try {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       role: user.role, 
     };
 
-    await buildSessionToken(payload);
+    await createSession(payload);
 
     return NextResponse.json({
       ok: true,
