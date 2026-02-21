@@ -6,3 +6,34 @@
 html {
   scroll-behavior: smooth;
 }
+
+.calendar-wrapper .react-calendar {
+  width: 100%;
+  border: none;
+  background: white;
+  font-family: inherit;
+}
+.calendar-wrapper .react-calendar__tile {
+  padding: 12px 0;
+  font-size: 14px;
+}
+.calendar-wrapper .react-calendar__tile:enabled:hover,
+.calendar-wrapper .react-calendar__tile:enabled:focus {
+  background-color: #e0e7ff;
+  color: #4338ca;
+  border-radius: 8px;
+}
+.calendar-wrapper .react-calendar__tile--active {
+  background: #4f46e5 !important;
+  color: white !important;
+  border-radius: 8px;
+}
+.calendar-wrapper .react-calendar__tile--now {
+  background: #f3f4f6;
+  border-radius: 8px;
+  color: #1f2937;
+}
+.calendar-wrapper .react-calendar__navigation button {
+  font-size: 16px;
+  font-weight: 600;
+}

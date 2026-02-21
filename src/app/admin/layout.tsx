@@ -49,6 +49,7 @@ export default async function AdminLayout({
           <Link href="/admin/contact" className="block text-gray-300 hover:text-white hover:underline transition-colors">Contact</Link>
           <Link href="/admin/media" className="block text-gray-300 hover:text-white hover:underline transition-colors">Média</Link>
           <Link href="/admin/legal-pages" className="block text-gray-300 hover:text-white hover:underline transition-colors">Pages légales</Link>
+          <Link href="/admin/availability" className="block text-gray-300 hover:text-white hover:underline transition-colors">Disponibilités</Link>
         </nav>
 
         {/* Bouton Déconnexion */}

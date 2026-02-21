@@ -29,13 +29,6 @@ enum ServiceAudience {
   EMPLOYEE // salariés
 }
 
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  NO_SHOW
-}
-
 enum Visibility {
   PUBLIC
   PRIVATE
@@ -46,20 +39,22 @@ enum ReactionType {
   LIKE // extensible
 }
 
-enum NotificationType {
-  APPOINTMENT_REMINDER
-}
-
-enum NotificationChannel {
-  EMAIL
-  SMS
-}
-
-enum NotificationStatus {
+enum AppointmentStatus {
   PENDING
-  SENT
-  FAILED
+  CONFIRMED
   CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
 }
 
 enum PageStatus{
@@ -80,7 +75,7 @@ enum PageSlug{
 model User {
   id           String @id @default(cuid())
   email        String @unique
-  passwordHash String
+  passwordHash String?
   role         Role   @default(CLIENT)
 
   firstName String?
@@ -104,7 +99,6 @@ model User {
   reactions           Reaction[]
   auditLogs           AuditLog[]           @relation("UserAuditLogs")
   passwordResets      PasswordResetToken[]
-  notifications       Notification[]
 }
 
 model PasswordResetToken {
@@ -167,6 +161,7 @@ model Service {
   title            String
   shortDescription String
   longDescription  String
+  duration         Int             @default(60) // Durée en minutes (par défaut 1h)
   iconKey          String? // ex: "User", "HeartCrack"
   audience         ServiceAudience
   priceType        PriceType
@@ -175,6 +170,8 @@ model Service {
   priceLabel       String? // ex: "60€", "Sur devis"
   order            Int             @default(0)
   visible          Boolean         @default(true)
+
+  appointments     Appointment[]   @relation("ServiceAppointments") 
 
   imageId String?
   image   Media?  @relation("ServiceImage", fields: [imageId], references: [id])
@@ -235,58 +232,55 @@ model PageRevision {
  * Rendez-vous (calendrier)
  * =========================
  */
+
+model Availability {
+  id        String    @id @default(cuid())
+  day       DayOfWeek // Quel jour ?
+  startTime String    // Ex: "09:00"
+  endTime   String    // Ex: "12:00" (Pause déjeuner) -> Créer une 2ème ligne pour "14:00"-"18:00"
+  isActive  Boolean   @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Unavailability {
+  id        String   @id @default(cuid())
+  start     DateTime // Début de l'absence
+  end       DateTime // Fin de l'absence
+  reason    String?  // Ex: "Congés été", "Formation"
+}
+
 model Appointment {
-  id      String            @id @default(cuid())
-  status  AppointmentStatus @default(PENDING)
-  startAt DateTime
-  endAt   DateTime
-  notes   String?
+  id          String            @id @default(cuid())
+  status      AppointmentStatus @default(PENDING)
+  startAt     DateTime
+  endAt       DateTime
+  price       Decimal?
+  notes       String?
+  adminNote   String?
 
   // Client (bénéficiaire)
-  userId String?
-  user   User?   @relation("UserAppointments", fields: [userId], references: [id])
+  userId      String
+  user        User   @relation("UserAppointments", fields: [userId], references: [id], onDelete: Cascade)
 
+  // Service
+  service   Service  @relation("ServiceAppointments", fields: [serviceId], references: [id])
+  serviceId String
   // Créé par (admin/support)
   createdById String?
   createdBy   User?   @relation("CreatedAppointments", fields: [createdById], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  // Notifications liées
-  notifications Notification[]
+  // Logs
+  canceledAt     DateTime?
+  canceledBy     String?       // "CLIENT" ou "ADMIN"
+  cancellationReason String?
 
   @@index([userId])
   @@index([startAt, endAt])
-}
-
-/**
- * =========================
- * Notifications (rappels RDV)
- * =========================
- */
-model Notification {
-  id           String              @id @default(cuid())
-  type         NotificationType
-  channel      NotificationChannel
-  status       NotificationStatus  @default(PENDING)
-  scheduledAt  DateTime
-  sentAt       DateTime?
-  errorMessage String?
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  appointmentId String
-  appointment   Appointment @relation(fields: [appointmentId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Évite les doublons : un rappel par canal et par RDV / user
-  @@unique([appointmentId, userId, type, channel])
-  @@index([userId])
-  @@index([appointmentId])
 }
 
 /**

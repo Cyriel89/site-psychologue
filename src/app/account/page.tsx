@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { COOKIE_NAME, parseSessionFromToken } from "@/lib/session";
 import DynamicIcon from "@/components/DynamicIcon";
+import Link from "next/link"
 
 export default async function ClientDashboard() {
   const cookieStore = await cookies();
@@ -46,9 +47,11 @@ export default async function ClientDashboard() {
           <div className="text-gray-500 text-sm">
             Aucun rendez-vous planifié pour le moment.
           </div>
-          <button className="mt-4 w-full py-2 text-sm text-blue-600 font-medium bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-            Prendre rendez-vous
-          </button>
+          <Link href="/book">
+            <button className="mt-4 w-full py-2 text-sm text-blue-600 font-medium bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+              Prendre rendez-vous
+            </button>
+          </Link>
         </div>
 
         {/* Carte 2 : Documents */}
@@ -70,7 +73,7 @@ export default async function ClientDashboard() {
             <div className="bg-emerald-100 p-3 rounded-lg text-emerald-600">
               <DynamicIcon name="message-circle" className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-gray-800">Besoin d'aide ?</h3>
+            <h3 className="font-semibold text-gray-800">Besoin d&apos;aide ?</h3>
           </div>
           <div className="text-gray-500 text-sm">
             Une question sur votre suivi ou un souci technique ?
