@@ -259,6 +259,7 @@ model Appointment {
   price       Decimal?
   notes       String?
   adminNote   String?
+  format      String            @default("FACE_TO_FACE") // Peut être FACE_TO_FACE ou VISIO
 
   // Client (bénéficiaire)
   userId      String

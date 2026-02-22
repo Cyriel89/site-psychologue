@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
@@ -34,6 +36,7 @@ export async function parseSessionFromToken(token: string | undefined = "") {
     });
     return payload as { userId: string; role: string; [key: string]: any };
   } catch (error) {
+    throw new Error("Invalid session token", { cause: error });
     return null;
   }
 }
@@ -41,4 +44,20 @@ export async function parseSessionFromToken(token: string | undefined = "") {
 export async function deleteSession() {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
+}
+
+export async function getSession() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  
+  if (!token) return null;
+
+  try {
+    // On réutilise ta fonction existante pour décoder le token
+    const session = await parseSessionFromToken(token);
+    return session;
+  } catch (error) {
+    // Si le token est expiré ou invalide, on retourne null au lieu de faire planter l'app
+    return null; 
+  }
 }

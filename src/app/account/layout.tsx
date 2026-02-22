@@ -27,12 +27,14 @@ export default async function ClientLayout({
           <div className="bg-indigo-100 p-2 rounded-full text-indigo-600">
             <DynamicIcon name="user" className="w-5 h-5" />
           </div>
+          <Link href="/account">
           <span className="font-bold text-gray-800">Mon Espace</span>
+          </Link>
+          
         </div>
 
         <nav className="p-4 space-y-2">
-          <NavLink href="/compte" icon="layout-dashboard" label="Tableau de bord" />
-          <NavLink href="/compte/rdv" icon="calendar" label="Mes Rendez-vous" />
+          <NavLink href="/account/appointments" icon="calendar" label="Mes Rendez-vous" />
           <NavLink href="/compte/documents" icon="file-text" label="Documents" />
           <NavLink href="/compte/profil" icon="settings" label="Mon Profil" />
           
